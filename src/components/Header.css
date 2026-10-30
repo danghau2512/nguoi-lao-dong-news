@@ -1,61 +1,419 @@
+
 .news-header {
     width: 100%;
-    background-color: white;
-    border-bottom: 3px solid #c8102e;
+    background-color: #fff;
+    color: #3d3d3d;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .news-header-container {
-    max-width: 1100px;
+    width: min(1350px, calc(100% - 36px));
     margin: 0 auto;
-    padding: 20px;
+}
 
+.news-header-top {
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 3px solid #ed1c24;
+}
+
+.news-header-top-inner {
+    min-height: 110px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.news-header-title {
-    margin: 0;
-    font-size: 30px;
-    font-weight: bold;
-    line-height: 1.3;
-    letter-spacing: 0;
+    gap: 24px;
 }
 
 .news-header-logo {
-    color: #c8102e;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
     text-decoration: none;
+}
+
+.news-header-logo img {
+    display: block;
+    width: 290px;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.news-header-top-right {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 23px;
+}
+
+.news-header-languages {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.news-header-language-link,
+.news-header-language-label {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    color: #006bb6;
+    text-decoration: none;
+}
+
+.news-header-language-link:hover {
+    color: #ed1c24;
+    text-decoration: underline;
+}
+
+.news-header-language-link .fi,
+.news-header-language-label .fi {
+    display: inline-block;
+    width: 18px;
+    height: 12px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.news-header-separator {
+    color: #888;
+    font-weight: normal;
+}
+
+.news-header-channels {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 30px;
+}
+
+.news-header-channel-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.news-header-channel-link img {
+    display: block;
+    width: auto;
+    max-width: none;
+    object-fit: contain;
+}
+
+.news-header-tv img {
+    height: 42px;
+}
+
+.news-header-travel img {
+    height: 34px;
+}
+
+.news-header-union img {
+    height: 30px;
+}
+
+.news-header-religion img {
+    height: 31px;
+}
+
+.news-header-young img {
+    height: 35px;
+}
+
+.news-header-vietnam-union img {
+    height: 36px;
+}
+
+.news-header-bottom {
+    width: 100%;
+    background-color: #fff;
+    border-bottom: 1px solid #dedede;
 }
 
 .news-header-nav {
+    min-height: 39px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 13px;
 }
 
-.news-header-link {
-    color: #333;
+.news-header-home {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    color: #555;
+    font-size: 21px;
     text-decoration: none;
-    font-size: 16px;
 }
 
-.news-header-link:hover {
-    color: #c8102e;
+.news-header-home:hover {
+    color: #ed1c24;
+}
+
+.news-header-categories {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 14px;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.news-header-categories span {
+    color: #444;
+}
+
+.news-header-tools {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 13px;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.news-header-tools > span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.news-header-tools i {
+    font-size: 14px;
+}
+
+.news-header-tool-podcast {
+    color: #0088d8;
+    font-size: 19px;
+}
+
+.news-header-tool-podcast i {
+    font-size: 19px;
+}
+
+.news-header-live {
+    color: #ed1c24;
+    border: 1px solid #ed1c24;
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.news-header-tool-quiz i {
+    color: #ed1c24;
+}
+
+.news-header-bell {
+    color: #ed1c24;
+}
+
+.news-header-tool-search i,
+.news-header-tool-login i {
+    color: #555;
+}
+
+.news-header-menu-button {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #444;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
 }
 
 .news-header-logo:focus-visible,
-.news-header-link:focus-visible {
-    outline: 2px solid #c8102e;
-    outline-offset: 4px;
+.news-header-home:focus-visible,
+.news-header-channel-link:focus-visible,
+.news-header-language-link:focus-visible,
+.news-header-menu-button:focus-visible {
+    outline: 2px solid #ed1c24;
+    outline-offset: 3px;
+}
+
+@media (max-width: 1450px) {
+    .news-header-top-inner {
+        gap: 16px;
+    }
+
+    .news-header-logo img {
+        width: 265px;
+    }
+
+    .news-header-channels {
+        gap: 12px;
+    }
+
+    .news-header-categories {
+        gap: 10px;
+        font-size: 12px;
+    }
+
+    .news-header-tools {
+        gap: 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .news-header-tool-podcast,
+    .news-header-tool-quiz,
+    .news-header-tool-latest {
+        display: none !important;
+    }
+
+    .news-header-logo img {
+        width: 245px;
+    }
+
+    .news-header-top-right {
+        gap: 17px;
+    }
+
+    .news-header-channels {
+        gap: 9px;
+    }
+
+    .news-header-tv img {
+        height: 30px;
+    }
+
+    .news-header-travel img {
+        height: 24px;
+    }
+
+    .news-header-union img,
+    .news-header-religion img {
+        height: 21px;
+    }
+
+    .news-header-young img,
+    .news-header-vietnam-union img {
+        height: 25px;
+    }
+
+    .news-header-languages {
+        gap: 5px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .news-header-top-inner {
+        min-height: 95px;
+    }
+
+    .news-header-logo img {
+        width: 220px;
+    }
+
+    .news-header-nav {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    .news-header-menu-button {
+        display: inline-flex;
+    }
+
+    .news-header-categories {
+        display: none;
+        flex-basis: 100%;
+        flex-wrap: wrap;
+        gap: 15px 20px;
+        padding: 12px 0;
+        border-top: 1px solid #eee;
+        order: 3;
+    }
+
+    .news-header-categories.is-open {
+        display: flex;
+    }
+
+    .news-header-tools {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 900px) {
+    .news-header-top-inner {
+        min-height: 80px;
+    }
+
+    .news-header-logo img {
+        width: 235px;
+    }
+
+    .news-header-top-right {
+        display: none;
+    }
+
+    .news-header-tool-search,
+    .news-header-tool-login {
+        display: none !important;
+    }
 }
 
 @media (max-width: 600px) {
     .news-header-container {
-        flex-direction: column;
-        gap: 12px;
+        width: calc(100% - 24px);
     }
 
-    .news-header-title {
-        font-size: 24px;
+    .news-header-top-inner {
+        min-height: 70px;
+    }
+
+    .news-header-logo img {
+        width: 205px;
+    }
+
+    .news-header-nav {
+        min-height: 42px;
+        gap: 15px;
+    }
+
+    .news-header-home {
+        font-size: 20px;
+    }
+
+    .news-header-menu-button {
+        font-size: 13px;
+        padding: 7px 10px;
+    }
+
+    .news-header-categories {
+        gap: 14px;
+        font-size: 13px;
+    }
+
+    .news-header-live {
+        margin-left: auto;
     }
 }
