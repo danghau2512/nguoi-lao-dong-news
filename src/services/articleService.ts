@@ -73,3 +73,21 @@ export function extractArticleSummary(html: string) {
         publishedAt,
     }
 }
+
+export function extractArticleContent(html: string): string {
+    const document = new DOMParser().parseFromString(
+        html,
+        'text/html'
+    )
+    const contentElement = document.querySelector(
+        '#gallery-ctt.art-body'
+    )
+    if (!contentElement) {
+        throw new Error('Không tìm thấy vùng nội dung bài viết')
+    }
+    const contentText = contentElement.textContent?.trim() ?? ''
+    if (!contentText) {
+        throw new Error('Nội dung bài viết rỗng hoặc chưa được hỗ trợ')
+    }
+    return contentElement.innerHTML
+}
