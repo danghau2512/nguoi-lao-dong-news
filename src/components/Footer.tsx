@@ -1,508 +1,349 @@
 
-import { Link } from 'react-router-dom'
-import logoLaoDong from '../assets/logo/ldo_red.png'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { categories } from '../constants/categories'
 import './Footer.css'
 
-const sitemapColumns = [
-    [
-        {
-            title: 'MẶT TRẬN',
-            url: 'https://laodong.vn/mat-tran',
-            children: [
-                'Hoạt động Mặt trận',
-                'Công đoàn',
-                'Dân tộc Tôn giáo',
-                'Người Việt tử tế',
-                'Tấm Lòng Vàng'
-            ]
-        },
-        {
-            title: 'KINH DOANH',
-            url: 'https://laodong.vn/kinh-doanh',
-            children: [
-                'Tiền tệ & Đầu tư',
-                'Thị trường',
-                'Doanh nghiệp',
-                'Doanh nhân'
-            ]
-        },
-        {
-            title: 'CÔNG ĐOÀN',
-            url: 'https://laodong.vn/cong-doan',
-            children: [
-                'Cách làm hay từ cơ sở',
-                'Vì lợi ích đoàn viên'
-            ]
-        },
-        {
-            title: 'THẾ GIỚI',
-            url: 'https://laodong.vn/the-gioi',
-            children: ['Tư liệu']
-        },
-        {
-            title: 'BẠN ĐỌC',
-            url: 'https://laodong.vn/ban-doc',
-            children: [
-                'Điều tra theo đơn thư',
-                'Chính sách',
-                'Ý kiến - Hỏi đáp'
-            ]
-        },
-        {
-            title: 'CÔNG NGHỆ',
-            url: 'https://laodong.vn/cong-nghe',
-            children: [
-                'Thế giới số',
-                'Vũ khí - Quân sự'
-            ]
-        },
-        {
-            title: 'ĐÍNH CHÍNH',
-            url: 'https://www.google.com/search?q=site%3Alaodong.vn+%22%C4%91%C3%ADnh+ch%C3%ADnh%22',
-            children: []
-        }
-    ],
-    [
-        {
-            title: 'XÃ HỘI',
-            url: 'https://laodong.vn/xa-hoi',
-            children: [
-                'Môi trường',
-                'Giao thông'
-            ]
-        },
-        {
-            title: 'PHÁP LUẬT',
-            url: 'https://laodong.vn/phap-luat',
-            children: [
-                'Tư vấn pháp luật',
-                'An ninh hình sự'
-            ]
-        },
-        {
-            title: 'SỨC KHỎE',
-            url: 'https://laodong.vn/suc-khoe',
-            children: [
-                'Y tế',
-                'Dinh dưỡng - Ẩm thực',
-                'Làm đẹp',
-                'Các loại bệnh'
-            ]
-        },
-        {
-            title: 'VĂN HÓA - GIẢI TRÍ',
-            url: 'https://laodong.vn/van-hoa-giai-tri',
-            children: [
-                'Văn hóa',
-                'Giải trí',
-                'Thời trang',
-                'Sách hay'
-            ]
-        },
-        {
-            title: 'GIÁO DỤC',
-            url: 'https://laodong.vn/giao-duc',
-            children: [
-                'Chính sách giáo dục',
-                'Tuyển sinh'
-            ]
-        },
-        {
-            title: 'XE',
-            url: 'https://laodong.vn/xe',
-            children: [
-                'Thị trường xe',
-                'Lái xe an toàn'
-            ]
-        }
-    ],
-    [
-        {
-            title: 'MEDIA',
-            url: 'https://laodong.vn/media',
-            children: [
-                'Lao Động TV',
-                'Hypertext',
-                'Photo',
-                'Podcast'
-            ]
-        },
-        {
-            title: 'THỜI SỰ',
-            url: 'https://laodong.vn/thoi-su',
-            children: ['Sự kiện bình luận']
-        },
-        {
-            title: 'THỂ THAO',
-            url: 'https://laodong.vn/the-thao',
-            children: [
-                'Bóng chuyền',
-                'Bóng đá Việt Nam',
-                'Bóng đá quốc tế',
-                'Lịch thi đấu',
-                'Golf',
-                'Tennis'
-            ]
-        },
-        {
-            title: 'BẤT ĐỘNG SẢN',
-            url: 'https://laodong.vn/bat-dong-san',
-            children: [
-                'Nhà đẹp',
-                'Quy hoạch'
-            ]
-        },
-        {
-            title: 'HÔN NHÂN GIA ĐÌNH',
-            url: 'https://laodong.vn/hon-nhan-gia-dinh',
-            children: [
-                'Chuyện nhà mình',
-                'Yêu 360',
-                'Nuôi con'
-            ]
-        },
-        {
-            title: 'TIN TỨC VIỆC LÀM',
-            url: 'https://laodong.vn/viec-lam',
-            children: [
-                'Tư vấn lao động',
-                'Xuất khẩu lao động'
-            ]
-        }
-    ]
-]
-
-function getSitemapChildUrl(name: string) {
-    const sitemapChildUrls: Record<string, string> = {
-        'Lao Động TV': 'https://laodong.vn/video/',
-        'Photo': 'https://laodong.vn/photo/'
-    }
-
-    if (sitemapChildUrls[name]) {
-        return sitemapChildUrls[name]
-    } else {
-        return 'https://www.google.com/search?q=' +
-            encodeURIComponent('site:laodong.vn "' + name + '"')
-    }
-}
+const newsCategories = categories.slice(0, 6)
+const lifeCategories = categories.slice(6, 11)
+const otherCategories = categories.slice(11)
 
 export default function Footer() {
+    const [searchKeyword, setSearchKeyword] = useState('')
+    const navigate = useNavigate()
+
+    function handleSearch(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+
+        const keyword = searchKeyword.trim()
+
+        if (keyword !== '') {
+            navigate('/tim-kiem?q=' + encodeURIComponent(keyword))
+            setSearchKeyword('')
+        }
+    }
+
     return (
         <footer className="news-footer">
 
-            <div className="news-footer-sitemap">
-                <div className="news-footer-sitemap-container">
-
-                    <form
-                        className="news-footer-search"
-                        action="https://www.google.com/search"
-                        method="get"
-                        target="_blank"
-                        role="search"
-                    >
-                        <i
-                            className="fa-solid fa-magnifying-glass"
-                            aria-hidden="true"
-                        ></i>
-
-                        <input
-                            type="search"
-                            name="q"
-                            placeholder="Tìm kiếm trên Google"
-                            aria-label="Tìm kiếm tin trên Báo Lao Động"
-                            required
-                        />
-
-                        <input
-                            type="hidden"
-                            name="as_sitesearch"
-                            value="laodong.vn"
-                        />
-                    </form>
-
-                    <div className="news-footer-sitemap-grid">
-                        {sitemapColumns.map((column, columnIndex) => (
-                            <div
-                                className="news-footer-sitemap-column"
-                                key={columnIndex}
-                            >
-                                {column.map((section) => (
-                                    <div
-                                        className="news-footer-sitemap-group"
-                                        key={section.title}
-                                    >
-                                        <a
-                                            className="news-footer-sitemap-title"
-                                            href={section.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {section.title}
-                                        </a>
-
-                                        <div className="news-footer-sitemap-links">
-                                            {section.children.map((item) => (
-                                                <a
-                                                    key={item}
-                                                    href={getSitemapChildUrl(item)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    {item}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="news-footer-information">
+            <section className="news-footer-sitemap">
                 <div className="news-footer-container">
 
-                    <div className="news-footer-social">
-                        <a
-                            href="https://www.facebook.com/laodongonline"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-social-facebook"
-                            aria-label="Facebook Báo Lao Động"
-                            title="Facebook"
-                        >
-                            <i
-                                className="fa-brands fa-facebook-f"
-                                aria-hidden="true"
-                            ></i>
-                        </a>
+                    <div className="news-footer-sitemap-top">
 
-                        <a
-                            href="https://zalo.me/1953123341318396123"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-social-zalo"
-                            aria-label="Zalo Báo Lao Động"
-                            title="Zalo"
-                        >
-                            Zalo
-                        </a>
+                        <div className="news-footer-sitemap-intro">
+                            <span className="news-footer-section-label">
+                                DANH MỤC TIN TỨC
+                            </span>
 
-                        <a
-                            href="https://news.google.com/search?q=site%3Alaodong.vn&hl=vi&gl=VN&ceid=VN%3Avi"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-social-google"
-                            aria-label="Google News Báo Lao Động"
-                            title="Google News"
-                        >
-                            <i
-                                className="fa-brands fa-google"
-                                aria-hidden="true"
-                            ></i>
-                        </a>
+                            <h2>Các chuyên mục</h2>
 
-                        <a
-                            href="https://www.youtube.com/@laodongtvonline"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-social-youtube"
-                            aria-label="YouTube Báo Lao Động"
-                            title="YouTube"
-                        >
-                            <i
-                                className="fa-brands fa-youtube"
-                                aria-hidden="true"
-                            ></i>
-                        </a>
+                            <p>
+                                Theo dõi tin tức theo từng lĩnh vực.
+                            </p>
+                        </div>
 
-                        <a
-                            href="mailto:toasoan@laodong.com.vn"
-                            className="news-footer-social-email"
-                            aria-label="Email Báo Lao Động"
-                            title="Email"
+                        <form
+                            className="news-footer-search"
+                            onSubmit={handleSearch}
+                            role="search"
                         >
-                            <i
-                                className="fa-solid fa-envelope"
-                                aria-hidden="true"
-                            ></i>
-                        </a>
+                            <label
+                                htmlFor="news-footer-search-input"
+                                className="news-footer-visually-hidden"
+                            >
+                                Tìm kiếm bài viết
+                            </label>
 
-                        <a
-                            href="https://news.google.com/rss/search?q=site%3Alaodong.vn&hl=vi&gl=VN&ceid=VN%3Avi"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-social-rss"
-                            aria-label="RSS tin Báo Lao Động qua Google News"
-                            title="RSS qua Google News"
-                        >
-                            <i
-                                className="fa-solid fa-rss"
-                                aria-hidden="true"
-                            ></i>
-                        </a>
+                            <input
+                                id="news-footer-search-input"
+                                type="search"
+                                placeholder="Tìm kiếm tin tức..."
+                                value={searchKeyword}
+                                onChange={(event) => {
+                                    setSearchKeyword(event.target.value)
+                                }}
+                            />
+
+                            <button
+                                type="submit"
+                                aria-label="Tìm kiếm"
+                            >
+                                <i
+                                    className="fa-solid fa-magnifying-glass"
+                                    aria-hidden="true"
+                                ></i>
+                            </button>
+                        </form>
+
                     </div>
+
+                    <div className="news-footer-sitemap-grid">
+
+                        <div className="news-footer-sitemap-column">
+                            <h3>Tin tức</h3>
+
+                            <div className="news-footer-sitemap-links">
+                                <Link to="/">
+                                    Trang chủ
+                                </Link>
+
+                                {newsCategories.map((category) => (
+                                    <Link
+                                        key={category.slug}
+                                        to={'/chuyen-muc/' + category.slug}
+                                    >
+                                        {category.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="news-footer-sitemap-column">
+                            <h3>Đời sống và xã hội</h3>
+
+                            <div className="news-footer-sitemap-links">
+                                {lifeCategories.map((category) => (
+                                    <Link
+                                        key={category.slug}
+                                        to={'/chuyen-muc/' + category.slug}
+                                    >
+                                        {category.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="news-footer-sitemap-column">
+                            <h3>Chuyên mục khác</h3>
+
+                            <div className="news-footer-sitemap-links">
+                                {otherCategories.map((category) => (
+                                    <Link
+                                        key={category.slug}
+                                        to={'/chuyen-muc/' + category.slug}
+                                    >
+                                        {category.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section className="news-footer-information">
+                <div className="news-footer-container">
 
                     <div className="news-footer-information-grid">
 
-                        <div className="news-footer-brand">
+                        <div className="news-footer-about">
+
                             <Link
                                 to="/"
-                                aria-label="Về trang chủ"
+                                className="news-footer-brand"
+                                aria-label="Góc Tin - Trang chủ"
                             >
-                                <img
-                                    src={logoLaoDong}
-                                    alt="Báo Lao Động"
-                                />
+                                <span className="news-footer-brand-icon">
+                                    <i
+                                        className="fa-regular fa-newspaper"
+                                        aria-hidden="true"
+                                    ></i>
+                                </span>
+
+                                <strong>GÓC TIN</strong>
                             </Link>
-                        </div>
 
-                        <div className="news-footer-editorial">
-                            <p>
-                                Xuất bản số Báo Lao Động đầu tiên vào ngày 14.8.1929
+                            <p className="news-footer-description">
+                                Góc Tin tổng hợp và cập nhật thông tin
+                                về thời sự, kinh tế, lao động, giáo dục,
+                                sức khỏe và các lĩnh vực được quan tâm.
                             </p>
 
-                            <p className="news-footer-editorial-heading">
-                                CƠ QUAN CỦA TỔNG LIÊN ĐOÀN LAO ĐỘNG VIỆT NAM
-                            </p>
+                            <div className="news-footer-source">
+                                <span>Nguồn tin tham khảo</span>
 
-                            <p>
-                                Giấy phép số 346/GP-BTTTT do Bộ TTTT cấp ngày 08.07.2022
-                            </p>
+                                <a
+                                    href="https://tuoitre.vn/nld/index.htm"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Báo Người Lao Động
+                                    <i
+                                        className="fa-solid fa-arrow-up-right-from-square"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+                            </div>
 
-                            <p>
-                                Tổng Biên tập: Nguyễn Ngọc Hiển
-                            </p>
-
-                            <p className="news-footer-address-heading">
-                                Địa chỉ liên hệ:
-                            </p>
-
-                            <p>
-                                Số 6 Phạm Văn Bạch, phường Cầu Giấy,
-                                Thành phố Hà Nội
-                            </p>
                         </div>
 
                         <div className="news-footer-contact">
-                            <h3>Thông tin liên hệ:</h3>
+                            <h3>Thông tin nguồn báo</h3>
 
-                            <div className="news-footer-contact-row">
-                                <span>Tòa soạn:</span>
-
-                                <div>
-                                    <a href="tel:+842438252441">
-                                        (+84 24) 38252441
-                                    </a>
-
-                                    {' - '}
-
-                                    <a href="tel:+842435330305">
-                                        35330305
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div className="news-footer-contact-row">
-                                <span>Báo điện tử:</span>
-
-                                <div>
-                                    <a href="tel:+842438303044">
-                                        (+84 24) 38303044
-                                    </a>
-
-                                    <div>
-                                        Email:
-                                        {' '}
-                                        <a href="mailto:toasoan@laodong.com.vn">
-                                            toasoan@laodong.com.vn
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="news-footer-contact-row">
-                                <span>Quảng cáo:</span>
-
-                                <div>
-                                    <div>
-                                        <a href="tel:+842439232694">
-                                            (+84 24) 39232694
-                                        </a>
-                                        {' (Báo in)'}
-                                    </div>
-
-                                    <div>
-                                        <a href="tel:+842435335237">
-                                            (+84 24) 35335237
-                                        </a>
-                                        {' (online)'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p className="news-footer-hotline">
-                                Đường dây nóng:
-                                {' '}
-                                <a href="tel:0968383388">
-                                    096 8383388
-                                </a>
-                                {' '}
-                                * Bạn đọc:
-                                {' '}
-                                <a href="tel:+842435335235">
-                                    (+84 24) 35335235
-                                </a>
+                            <p>
+                                Thông tin và các kênh liên hệ của
+                                Báo Người Lao Động.
                             </p>
+
+                            <a
+                                href="https://tuoitre.vn/nld/index.htm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i
+                                    className="fa-solid fa-globe"
+                                    aria-hidden="true"
+                                ></i>
+                                <span>Báo Người Lao Động</span>
+                            </a>
+
+                            <a
+                                href="https://tuoitre.vn/nld/rss.htm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <i
+                                    className="fa-solid fa-rss"
+                                    aria-hidden="true"
+                                ></i>
+                                <span>Danh sách RSS Người Lao Động</span>
+                            </a>
+
+                            <a href="mailto:online@nld.com.vn">
+                                <i
+                                    className="fa-regular fa-envelope"
+                                    aria-hidden="true"
+                                ></i>
+                                <span>online@nld.com.vn</span>
+                            </a>
+
                         </div>
-                    </div>
 
-                    <div className="news-footer-apps">
+                        <div className="news-footer-connect">
+                            <h3>Kết nối</h3>
 
-                        <a
-                            href="https://play.google.com/store/apps/details?id=com.ninepoints.ldo.reader"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-app-badge"
-                            aria-label="Tải ứng dụng Báo Lao Động trên Google Play"
-                        >
-                            <i
-                                className="fa-brands fa-google-play"
-                                aria-hidden="true"
-                            ></i>
+                            <p>
+                                Theo dõi tin tức qua các kênh
+                                của Báo Người Lao Động.
+                            </p>
 
-                            <div>
-                                <small>GET IT ON</small>
-                                <strong>Google Play</strong>
+                            <div className="news-footer-social">
+
+                                <a
+                                    href="https://www.facebook.com/nguoilaodong"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="news-footer-social-facebook"
+                                    aria-label="Facebook Báo Người Lao Động"
+                                    title="Facebook"
+                                >
+                                    <i
+                                        className="fa-brands fa-facebook-f"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+
+                                <a
+                                    href="https://www.youtube.com/@NguoiLaoDongTV"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="news-footer-social-youtube"
+                                    aria-label="YouTube Báo Người Lao Động"
+                                    title="YouTube"
+                                >
+                                    <i
+                                        className="fa-brands fa-youtube"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+
+                                <a
+                                    href="https://www.tiktok.com/@baonguoilaodong"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="news-footer-social-tiktok"
+                                    aria-label="TikTok Báo Người Lao Động"
+                                    title="TikTok"
+                                >
+                                    <i
+                                        className="fa-brands fa-tiktok"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+
+                                <a
+                                    href="https://zalo.me/nguoilaodongonline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="news-footer-social-zalo"
+                                    aria-label="Zalo Báo Người Lao Động"
+                                    title="Zalo"
+                                >
+                                    Zalo
+                                </a>
+
+                                <a
+                                    href="mailto:online@nld.com.vn"
+                                    className="news-footer-social-email"
+                                    aria-label="Email Báo Người Lao Động"
+                                    title="Email"
+                                >
+                                    <i
+                                        className="fa-regular fa-envelope"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+
+                                <a
+                                    href="https://tuoitre.vn/nld/rss.htm"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="news-footer-social-rss"
+                                    aria-label="RSS Báo Người Lao Động"
+                                    title="RSS"
+                                >
+                                    <i
+                                        className="fa-solid fa-rss"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+
                             </div>
-                        </a>
 
-                        <a
-                            href="https://apps.apple.com/vn/app/id1328195523"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="news-footer-app-badge"
-                            aria-label="Tải ứng dụng Báo Lao Động trên App Store"
-                        >
-                            <i
-                                className="fa-brands fa-apple"
-                                aria-hidden="true"
-                            ></i>
-
-                            <div>
-                                <small>Download on the</small>
-                                <strong>App Store</strong>
+                            <div className="news-footer-read-more">
+                                <a
+                                    href="https://tuoitre.vn/tto-nld.htm"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Đọc thêm tin tức Người Lao Động
+                                    <i
+                                        className="fa-solid fa-arrow-up-right-from-square"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
                             </div>
-                        </a>
+
+                        </div>
+
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div className="news-footer-copyright">
-                <p>
-                    Nội dung và thương hiệu Báo Lao Động thuộc đơn vị sở hữu tương ứng.
-                </p>
+            <div className="news-footer-bottom">
+                <div className="news-footer-container news-footer-bottom-inner">
+                    <p>
+                        © Góc Tin. Tin tức được tổng hợp từ các nguồn công khai.
+                    </p>
+
+                    <p>
+                        Nội dung và hình ảnh thuộc bản quyền
+                        của đơn vị xuất bản tương ứng.
+                    </p>
+                </div>
             </div>
 
         </footer>
