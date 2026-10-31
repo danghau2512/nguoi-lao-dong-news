@@ -55,8 +55,21 @@ export function extractArticleSummary(html: string) {
     if (!title) {
         throw new Error('Không tìm thấy tiêu đề bài viết')
     }
+    const author =
+        document.querySelector('span.authors')?.textContent?.trim() ||
+        undefined
+    const publishedAt =
+        document
+            .querySelector(
+                'meta[property="article:published_time"], ' +
+                'meta[name="article:published_time"]'
+            )
+            ?.getAttribute('content')
+            ?.trim() || undefined
     return {
         title,
         description,
+        author,
+        publishedAt,
     }
 }
