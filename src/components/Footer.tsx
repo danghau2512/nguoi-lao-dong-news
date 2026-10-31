@@ -158,19 +158,20 @@ export default function Footer() {
 
                             <p className="news-footer-description">
                                 Góc Tin tổng hợp và cập nhật thông tin
-                                về thời sự, kinh tế, lao động, giáo dục,
-                                sức khỏe và các lĩnh vực được quan tâm.
+                                về thời sự, xã hội, công đoàn, kinh doanh,
+                                thể thao và các lĩnh vực được quan tâm.
                             </p>
 
                             <div className="news-footer-source">
                                 <span>Nguồn tin tham khảo</span>
 
                                 <a
-                                    href="https://tuoitre.vn/nld/index.htm"
+                                    href="https://laodong.vn/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    Báo Người Lao Động
+                                    Báo Lao Động
+
                                     <i
                                         className="fa-solid fa-arrow-up-right-from-square"
                                         aria-hidden="true"
@@ -184,12 +185,12 @@ export default function Footer() {
                             <h3>Thông tin nguồn báo</h3>
 
                             <p>
-                                Thông tin và các kênh liên hệ của
-                                Báo Người Lao Động.
+                                Thông tin liên hệ của Báo Lao Động,
+                                đơn vị xuất bản nội dung gốc.
                             </p>
 
                             <a
-                                href="https://tuoitre.vn/nld/index.htm"
+                                href="https://laodong.vn/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -197,27 +198,26 @@ export default function Footer() {
                                     className="fa-solid fa-globe"
                                     aria-hidden="true"
                                 ></i>
-                                <span>Báo Người Lao Động</span>
+
+                                <span>laodong.vn</span>
                             </a>
 
-                            <a
-                                href="https://tuoitre.vn/nld/rss.htm"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <i
-                                    className="fa-solid fa-rss"
-                                    aria-hidden="true"
-                                ></i>
-                                <span>Danh sách RSS Người Lao Động</span>
-                            </a>
-
-                            <a href="mailto:online@nld.com.vn">
+                            <a href="mailto:toasoan@laodong.com.vn">
                                 <i
                                     className="fa-regular fa-envelope"
                                     aria-hidden="true"
                                 ></i>
-                                <span>online@nld.com.vn</span>
+
+                                <span>toasoan@laodong.com.vn</span>
+                            </a>
+
+                            <a href="tel:+842438252441">
+                                <i
+                                    className="fa-solid fa-phone"
+                                    aria-hidden="true"
+                                ></i>
+
+                                <span>(+84 24) 3825 2441</span>
                             </a>
 
                         </div>
@@ -226,18 +226,18 @@ export default function Footer() {
                             <h3>Kết nối</h3>
 
                             <p>
-                                Theo dõi tin tức qua các kênh
-                                của Báo Người Lao Động.
+                                Theo dõi Báo Lao Động qua các kênh
+                                thông tin và mạng xã hội.
                             </p>
 
                             <div className="news-footer-social">
 
                                 <a
-                                    href="https://www.facebook.com/nguoilaodong"
+                                    href="https://www.facebook.com/laodongonline"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="news-footer-social-facebook"
-                                    aria-label="Facebook Báo Người Lao Động"
+                                    aria-label="Facebook Báo Lao Động"
                                     title="Facebook"
                                 >
                                     <i
@@ -247,11 +247,11 @@ export default function Footer() {
                                 </a>
 
                                 <a
-                                    href="https://www.youtube.com/@NguoiLaoDongTV"
+                                    href="https://www.youtube.com/@laodongtvonline"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="news-footer-social-youtube"
-                                    aria-label="YouTube Báo Người Lao Động"
+                                    aria-label="YouTube Báo Lao Động"
                                     title="YouTube"
                                 >
                                     <i
@@ -261,11 +261,11 @@ export default function Footer() {
                                 </a>
 
                                 <a
-                                    href="https://www.tiktok.com/@baonguoilaodong"
+                                    href="https://www.tiktok.com/@laodong.vn"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="news-footer-social-tiktok"
-                                    aria-label="TikTok Báo Người Lao Động"
+                                    aria-label="TikTok Báo Lao Động"
                                     title="TikTok"
                                 >
                                     <i
@@ -275,20 +275,20 @@ export default function Footer() {
                                 </a>
 
                                 <a
-                                    href="https://zalo.me/nguoilaodongonline"
+                                    href="https://zalo.me/1953123341318396123"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="news-footer-social-zalo"
-                                    aria-label="Zalo Báo Người Lao Động"
+                                    aria-label="Zalo Báo Lao Động"
                                     title="Zalo"
                                 >
                                     Zalo
                                 </a>
 
                                 <a
-                                    href="mailto:online@nld.com.vn"
+                                    href="mailto:toasoan@laodong.com.vn"
                                     className="news-footer-social-email"
-                                    aria-label="Email Báo Người Lao Động"
+                                    aria-label="Email Báo Lao Động"
                                     title="Email"
                                 >
                                     <i
@@ -297,29 +297,16 @@ export default function Footer() {
                                     ></i>
                                 </a>
 
-                                <a
-                                    href="https://tuoitre.vn/nld/rss.htm"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="news-footer-social-rss"
-                                    aria-label="RSS Báo Người Lao Động"
-                                    title="RSS"
-                                >
-                                    <i
-                                        className="fa-solid fa-rss"
-                                        aria-hidden="true"
-                                    ></i>
-                                </a>
-
                             </div>
 
                             <div className="news-footer-read-more">
                                 <a
-                                    href="https://tuoitre.vn/tto-nld.htm"
+                                    href="https://laodong.vn/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    Đọc thêm tin tức Người Lao Động
+                                    Đọc thêm tại Báo Lao Động
+
                                     <i
                                         className="fa-solid fa-arrow-up-right-from-square"
                                         aria-hidden="true"
@@ -335,6 +322,7 @@ export default function Footer() {
 
             <div className="news-footer-bottom">
                 <div className="news-footer-container news-footer-bottom-inner">
+
                     <p>
                         © Góc Tin. Tin tức được tổng hợp từ các nguồn công khai.
                     </p>
@@ -343,6 +331,7 @@ export default function Footer() {
                         Nội dung và hình ảnh thuộc bản quyền
                         của đơn vị xuất bản tương ứng.
                     </p>
+
                 </div>
             </div>
 

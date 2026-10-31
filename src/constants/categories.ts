@@ -3,67 +3,67 @@ import type { NewsCategory } from '../types/news'
 
 export const categories: NewsCategory[] = [
     {
+        slug: 'xa-hoi',
+        name: 'Xã hội'
+    },
+    {
         slug: 'thoi-su',
         name: 'Thời sự'
     },
     {
-        slug: 'quoc-te',
-        name: 'Quốc tế'
+        slug: 'cong-doan',
+        name: 'Công đoàn'
     },
     {
-        slug: 'lao-dong',
-        name: 'Lao động'
+        slug: 'kinh-doanh',
+        name: 'Kinh doanh'
     },
     {
-        slug: 'ban-doc',
-        name: 'Bạn đọc'
-    },
-    {
-        slug: 'net-zero',
-        name: 'Net Zero'
-    },
-    {
-        slug: 'kinh-te',
-        name: 'Kinh tế'
-    },
-    {
-        slug: 'suc-khoe',
-        name: 'Sức khỏe'
-    },
-    {
-        slug: 'giao-duc',
-        name: 'Giáo dục'
-    },
-    {
-        slug: 'phap-luat',
-        name: 'Pháp luật'
-    },
-    {
-        slug: 'van-hoa-van-nghe',
-        name: 'Văn hóa - Văn nghệ'
-    },
-    {
-        slug: 'giai-tri',
-        name: 'Giải trí'
+        slug: 'the-gioi',
+        name: 'Thế giới'
     },
     {
         slug: 'the-thao',
         name: 'Thể thao'
     },
     {
-        slug: 'ai-365',
-        name: 'AI 365'
+        slug: 'van-hoa-giai-tri',
+        name: 'Văn hóa - Giải trí'
     },
     {
-        slug: 'phu-nu',
-        name: 'Phụ nữ'
+        slug: 'bat-dong-san',
+        name: 'Bất động sản'
     },
     {
-        slug: 'gia-dinh',
-        name: 'Gia đình'
+        slug: 'suc-khoe',
+        name: 'Sức khỏe'
     },
     {
-        slug: 'dia-oc',
-        name: 'Địa ốc'
+        slug: 'phap-luat',
+        name: 'Pháp luật'
+    },
+    {
+        slug: 'giao-duc',
+        name: 'Giáo dục'
+    },
+    {
+        slug: 'ban-doc',
+        name: 'Bạn đọc'
+    },
+    {
+        slug: 'xe',
+        name: 'Xe'
+    },
+    {
+        slug: 'media',
+        name: 'Media'
+    },
+    {
+        slug: 'cong-nghe',
+        name: 'Công nghệ'
+    },
+    {
+        slug: 'du-lich',
+        name: 'Du lịch'
     }
 ]
