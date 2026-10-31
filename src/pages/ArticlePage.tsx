@@ -2,6 +2,9 @@ import { Link, useParams } from 'react-router-dom'
 import {mockNews} from "../data/mockNews.ts";
 import { categories } from '../constants/categories'
 
+import MockArticleContent from '../components/article/MockArticleContent'
+import './ArticlePage.css'
+
 export default function ArticlePage() {
     const { id } = useParams<{ id: string }>()
 
@@ -41,7 +44,9 @@ export default function ArticlePage() {
                 </p>
             </header>
 
-            <Link to="/">Quay lại trang chủ</Link>
+            <MockArticleContent articleId={article.id} />
+
+            <Link className="article-page__back" to="/"> Quay lại trang chủ </Link>
         </article>
     )
 }

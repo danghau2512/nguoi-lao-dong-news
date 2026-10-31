@@ -3,15 +3,15 @@ import type { NewsArticle } from '../types/news'
 export const mockNews: NewsArticle[] = [
     {
         id: 'demo-1',
-        title: 'Bài viết mẫu thuộc chuyên mục Thời sự',
-        description: 'Dữ liệu thử nghiệm để xây dựng giao diện.',
+        title: 'Tạo thêm không gian xanh trong khu dân cư',
+        description: 'Những mảng xanh được chăm sóc thường xuyên góp phần cải thiện cảnh quan và không gian sinh hoạt chung..',
         sourceUrl: '',
         categorySlug: 'thoi-su',
     },
     {
         id: 'demo-2',
-        title: 'Bài viết mẫu thuộc chuyên mục Giáo dục',
-        description: 'Bài viết thứ hai dùng để kiểm tra danh sách tin.',
+        title: 'Rèn thói quen tự học từ những mục tiêu nhỏ',
+        description: 'Chia nhỏ nội dung, duy trì ôn tập và chủ động trao đổi giúp sinh viên xây dựng thói quen tự học.',
         sourceUrl: '',
         categorySlug: 'giao-duc',
     },
