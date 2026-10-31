@@ -39,3 +39,24 @@ export async function fetchArticleHtml(sourceUrl: string): Promise<string> {
     }
     return html
 }
+
+export function extractArticleSummary(html: string) {
+    const document = new DOMParser().parseFromString(
+        html,
+        'text/html'
+    )
+    const title =
+        document.querySelector('h1.title')?.textContent?.trim() ?? ''
+    const description =
+        document
+            .querySelector('meta[name="description"]')
+            ?.getAttribute('content')
+            ?.trim() ?? ''
+    if (!title) {
+        throw new Error('Không tìm thấy tiêu đề bài viết')
+    }
+    return {
+        title,
+        description,
+    }
+}
