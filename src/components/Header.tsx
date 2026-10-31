@@ -40,6 +40,7 @@ const languages = [
 
 export default function Header() {
     const [searchKeyword, setSearchKeyword] = useState('')
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
 
     const mainCategories = categories.slice(0, 7)
@@ -52,6 +53,7 @@ export default function Header() {
         if (keyword !== '') {
             navigate('/tim-kiem?q=' + encodeURIComponent(keyword))
             setSearchKeyword('')
+            setIsMenuOpen(false)
         }
     }
 
@@ -76,6 +78,7 @@ export default function Header() {
                         <Link
                             to="/"
                             className="news-header-language-link is-current"
+                            aria-label="Tiếng Việt - Trang chủ"
                         >
                             <span
                                 className="fi fi-vn"
@@ -93,6 +96,7 @@ export default function Header() {
                                 rel="noopener noreferrer"
                                 className="news-header-language-link"
                                 title={'Mở phiên bản ' + language.name + ' của Báo Lao Động'}
+                                aria-label={'Mở phiên bản ' + language.name + ' của Báo Lao Động'}
                             >
                                 <span
                                     className={'fi fi-' + language.flag}
@@ -155,8 +159,13 @@ export default function Header() {
                             }}
                         />
 
-                        <button type="submit">
-                            Tìm kiếm
+                        <button type="submit" aria-label="Tìm kiếm">
+                            <span>Tìm kiếm</span>
+
+                            <i
+                                className="fa-solid fa-magnifying-glass"
+                                aria-hidden="true"
+                            ></i>
                         </button>
                     </form>
 
@@ -167,10 +176,16 @@ export default function Header() {
                 <nav
                     className="news-header-container news-header-nav"
                     aria-label="Điều hướng chính"
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                            setIsMenuOpen(false)
+                        }
+                    }}
                 >
                     <Link
                         to="/"
                         className="news-header-home"
+                        onClick={() => setIsMenuOpen(false)}
                     >
                         <i
                             className="fa-solid fa-house"
@@ -186,17 +201,26 @@ export default function Header() {
                                 key={category.slug}
                                 to={'/chuyen-muc/' + category.slug}
                                 className="news-header-category-link"
+                                onClick={() => setIsMenuOpen(false)}
                             >
                                 {category.name}
                             </NavLink>
                         ))}
                     </div>
 
-                    <div className="news-header-more">
+                    <div
+                        className={
+                            isMenuOpen
+                                ? 'news-header-more is-open'
+                                : 'news-header-more'
+                        }
+                    >
                         <button
                             type="button"
                             className="news-header-more-button"
                             aria-controls="news-header-all-categories"
+                            aria-expanded={isMenuOpen}
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >
                             <span>Tất cả chuyên mục</span>
 
@@ -215,6 +239,7 @@ export default function Header() {
                                     key={category.slug}
                                     to={'/chuyen-muc/' + category.slug}
                                     className="news-header-all-category-link"
+                                    onClick={() => setIsMenuOpen(false)}
                                 >
                                     {category.name}
                                 </NavLink>

@@ -106,3 +106,49 @@
     outline: 2px solid #c92833;
     outline-offset: 3px;
 }
+
+@media (max-width: 767px) {
+    .news-card {
+        gap: 15px;
+    }
+
+    .news-card-image-link {
+        width: 210px;
+        height: 145px;
+    }
+
+    .news-card-title {
+        font-size: 18px;
+    }
+
+    .news-card-description {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 560px) {
+    .news-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 13px;
+        padding: 16px 0;
+    }
+
+    .news-card-image-link {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+    }
+
+    .news-card-content {
+        width: 100%;
+    }
+
+    .news-card-title {
+        font-size: 19px;
+    }
+
+    .news-card-description {
+        font-size: 14px;
+    }
+}
