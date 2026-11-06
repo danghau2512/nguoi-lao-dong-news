@@ -2,15 +2,22 @@
 import NewsCard from '../components/NewsCard'
 import { mockNews } from '../data/mockNews'
 import './HomePage.css'
-
+import { useCategoryNews } from '../hooks/useCategoryNews'
 export default function HomePage() {
     const featuredNews = mockNews[0]
     const latestNews = mockNews.slice(1, 3)
     const smallNews = mockNews.slice(3, 8)
-
+    const { articles, status, error, retry } = useCategoryNews('thoi-su')
     return (
         <div className="home-page">
-
+            <div>
+                <p>Redux: {status} · {articles.length} bài</p>
+                <p>{articles[0]?.title}</p>
+                {error && <p>{error}</p>}
+                <button type="button" onClick={retry}>
+                    Tải lại để kiểm tra
+                </button>
+            </div>
             <section className="home-page-featured">
                 <h1 className="home-page-title">
                     Tin tức nổi bật
