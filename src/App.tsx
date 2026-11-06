@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import MainLayout from './layout/MainLayout'
 import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
+import CategoryPage from './pages/CategoryPage'
 import { mockNews } from './data/mockNews'
 
 export default function App() {
@@ -14,7 +15,10 @@ export default function App() {
                     index
                     element={<HomePage articles={mockNews} />}
                 />
-
+                <Route
+                    path="chuyen-muc/:slug"
+                    element={<CategoryPage articles={mockNews} />}
+                />
                 <Route
                     path="bai-viet/:id"
                     element={<ArticlePage />}
