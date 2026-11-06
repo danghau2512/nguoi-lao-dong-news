@@ -1,12 +1,16 @@
 
+import type { NewsArticle } from '../types/news'
 import NewsCard from '../components/NewsCard'
-import { mockNews } from '../data/mockNews'
 import './HomePage.css'
 
-export default function HomePage() {
-    const featuredNews = mockNews[0]
-    const latestNews = mockNews.slice(1, 3)
-    const smallNews = mockNews.slice(3, 8)
+type HomePageProps = {
+    articles: NewsArticle[]
+}
+
+export default function HomePage(props: HomePageProps) {
+    const featuredNews = props.articles[0]
+    const latestNews = props.articles.slice(1, 3)
+    const smallNews = props.articles.slice(3, 8)
 
     return (
         <div className="home-page">
