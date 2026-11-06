@@ -4,6 +4,7 @@ import MainLayout from './layout/MainLayout'
 import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
 import CategoryPage from './pages/CategoryPage'
+import SearchPage from './pages/SearchPage'
 import { mockNews } from './data/mockNews'
 
 export default function App() {
@@ -18,6 +19,10 @@ export default function App() {
                 <Route
                     path="chuyen-muc/:slug"
                     element={<CategoryPage articles={mockNews} />}
+                />
+                <Route
+                    path="tim-kiem"
+                    element={<SearchPage articles={mockNews} />}
                 />
                 <Route
                     path="bai-viet/:id"
