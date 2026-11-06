@@ -1,13 +1,47 @@
 
 import type { NewsArticle } from '../types/news'
 import NewsCard from '../components/NewsCard'
+import NewsStatus from '../components/NewsStatus'
 import './HomePage.css'
-
 type HomePageProps = {
     articles: NewsArticle[]
+    isLoading?: boolean
+    error?: string | null
 }
 
 export default function HomePage(props: HomePageProps) {
+
+    if (props.isLoading === true) {
+        return (
+            <div className="home-page">
+                <NewsStatus type="loading" />
+            </div>
+        )
+    }
+
+    if (
+        props.error !== undefined &&
+        props.error !== null &&
+        props.error.trim() !== ''
+    ) {
+        return (
+            <div className="home-page">
+                <NewsStatus
+                    type="error"
+                    message={props.error}
+                />
+            </div>
+        )
+    }
+
+    if (props.articles.length === 0) {
+        return (
+            <div className="home-page">
+                <NewsStatus type="empty" />
+            </div>
+        )
+    }
+
     const featuredNews = props.articles[0]
     const latestNews = props.articles.slice(1, 3)
     const smallNews = props.articles.slice(3, 8)
