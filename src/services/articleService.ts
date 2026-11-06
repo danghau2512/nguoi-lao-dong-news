@@ -134,4 +134,16 @@ export function extractArticleContent(html: string, sourceUrl: string): string {
 
     contentElement.replaceChildren(cleanContent)
     return contentElement.innerHTML
+
+}
+
+export async function fetchArticleDetail(sourceUrl: string) {
+    const html = await fetchArticleHtml(sourceUrl)
+    const summary = extractArticleSummary(html)
+    const contentHtml = extractArticleContent(html, sourceUrl)
+
+    return {
+        ...summary,
+        contentHtml,
+    }
 }
