@@ -74,7 +74,7 @@ export function extractArticleSummary(html: string) {
     }
 }
 
-export function extractArticleContent(html: string): string {
+export function extractArticleContent(html: string, sourceUrl: string): string {
     const document = new DOMParser().parseFromString(
         html,
         'text/html'
@@ -89,5 +89,27 @@ export function extractArticleContent(html: string): string {
     if (!contentText) {
         throw new Error('Nội dung bài viết rỗng hoặc chưa được hỗ trợ')
     }
+    for (const image of contentElement.querySelectorAll('img')) {
+        const imageSources = [
+            image.getAttribute('data-src'),
+            image.getAttribute('src'),
+        ]
+
+        for (const imageSource of imageSources) {
+            const value = imageSource?.trim()
+            if (!value) continue
+
+            try {
+                const imageUrl = new URL(value, sourceUrl)
+
+                if (imageUrl.protocol === 'https:' || imageUrl.protocol === 'http:') {
+                    image.setAttribute('src', imageUrl.href)
+                    break
+                }
+            } catch {
+            }
+        }
+    }
+
     return contentElement.innerHTML
 }
