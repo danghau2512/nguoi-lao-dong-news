@@ -172,3 +172,123 @@
     color: #777;
     font-size: 14px;
 }
+
+@media (max-width: 1024px) {
+    .home-page {
+        padding: 28px 20px 45px;
+    }
+
+    .home-page-featured-content .news-card {
+        gap: 22px;
+    }
+
+    .home-page-featured-content .news-card-image-link {
+        width: 50%;
+        height: 270px;
+    }
+
+    .home-page-featured-content .news-card-title {
+        font-size: 25px;
+    }
+
+    .home-page-bottom {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 25px;
+    }
+
+    .home-page-latest-content .news-card-image-link {
+        height: 230px;
+    }
+
+    .home-page-small-news-list .news-card-image-link {
+        width: 95px;
+        height: 75px;
+    }
+}
+
+@media (max-width: 767px) {
+    .home-page {
+        padding: 24px 14px 38px;
+    }
+
+    .home-page-title {
+        margin-bottom: 20px;
+        font-size: 23px;
+    }
+
+    .home-page-featured {
+        margin-bottom: 32px;
+    }
+
+    .home-page-featured-content .news-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .home-page-featured-content .news-card-image-link {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+    }
+
+    .home-page-featured-content .news-card-content {
+        width: 100%;
+        padding-top: 0;
+    }
+
+    .home-page-featured-content .news-card-title {
+        margin-bottom: 12px;
+        font-size: 23px;
+    }
+
+    .home-page-bottom {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
+    }
+
+    .home-page-latest-content .news-card-image-link {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+    }
+
+    .home-page-latest-content .news-card-title {
+        font-size: 21px;
+    }
+
+    .home-page-small-news-list .news-card {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .home-page-small-news-list .news-card-image-link {
+        width: 120px;
+        height: 90px;
+        aspect-ratio: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-page-featured-content .news-card-title {
+        font-size: 22px;
+    }
+
+    .home-page-latest-content .news-card-title {
+        font-size: 20px;
+    }
+
+    .home-page-small-news .home-page-title {
+        font-size: 21px;
+    }
+
+    .home-page-small-news-list .news-card-image-link {
+        width: 100px;
+        height: 80px;
+    }
+
+    .home-page-small-news-list .news-card-title {
+        font-size: 14px;
+    }
+}
