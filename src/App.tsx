@@ -12,10 +12,7 @@ export default function App() {
         <Routes>
             <Route path="/" element={<MainLayout />}>
 
-                <Route
-                    index
-                    element={<HomePage articles={mockNews} />}
-                />
+                <Route index element={<HomePage />} />
                 <Route
                     path="chuyen-muc/:slug"
                     element={<CategoryPage articles={mockNews} />}

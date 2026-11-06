@@ -1,18 +1,13 @@
 
-import type { NewsArticle } from '../types/news'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './HomePage.css'
+import {useCategoryNews} from "../hooks/useCategoryNews.ts";
 
-type HomePageProps = {
-    articles: NewsArticle[]
-    isLoading?: boolean
-    error?: string | null
-}
+export default function HomePage() {
+    const { articles, status, error, retry } = useCategoryNews('thoi-su')
 
-export default function HomePage(props: HomePageProps) {
-
-    if (props.isLoading === true) {
+    if (status === 'idle' || status === 'loading') {
         return (
             <div className="home-page">
                 <NewsStatus type="loading" />
@@ -20,22 +15,16 @@ export default function HomePage(props: HomePageProps) {
         )
     }
 
-    if (
-        props.error !== undefined &&
-        props.error !== null &&
-        props.error.trim() !== ''
-    ) {
+    if (status === 'failed') {
         return (
             <div className="home-page">
-                <NewsStatus
-                    type="error"
-                    message={props.error}
-                />
+                <NewsStatus type="error" message={error ?? undefined} />
+                <button type="button" onClick={retry}>Thử lại</button>
             </div>
         )
     }
 
-    if (props.articles.length === 0) {
+    if (articles.length === 0) {
         return (
             <div className="home-page">
                 <NewsStatus type="empty" />
@@ -43,9 +32,9 @@ export default function HomePage(props: HomePageProps) {
         )
     }
 
-    const featuredNews = props.articles[0]
-    const latestNews = props.articles.slice(1, 3)
-    const smallNews = props.articles.slice(3, 8)
+    const featuredNews = articles[0]
+    const latestNews = articles.slice(1, 3)
+    const smallNews = articles.slice(3, 8)
 
     return (
         <div className="home-page">
