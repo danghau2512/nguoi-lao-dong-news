@@ -3,6 +3,7 @@ import type { NewsArticle } from '../types/news'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './HomePage.css'
+
 type HomePageProps = {
     articles: NewsArticle[]
     isLoading?: boolean
