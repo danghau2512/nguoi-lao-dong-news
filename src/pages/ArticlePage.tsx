@@ -30,6 +30,13 @@ import './ArticlePage.css'
         const [article, setArticle] = useState<ArticleDetail | null>(null)
         const [error, setError] = useState('')
 
+        const [retryCount, setRetryCount] = useState(0)
+
+        function handleRetry() {
+            setError('')
+            setRetryCount((count) => count + 1)
+        }
+
         const sourceError = !sourceUrl
             ? 'Thiếu URL bài viết.'
             : !isValidArticleUrl(sourceUrl)
@@ -58,7 +65,7 @@ import './ArticlePage.css'
             return () => {
                 ignore = true
             }
-        }, [sourceUrl, sourceError])
+        }, [sourceUrl, sourceError, retryCount])
 
         const errorMessage = sourceError || error
 
@@ -69,6 +76,12 @@ import './ArticlePage.css'
                         <p role="alert">{errorMessage}</p>
                     ) : (
                         <p role="status">Đang tải bài viết…</p>
+                    )}
+
+                    {error && !sourceError && (
+                        <button type="button" onClick={handleRetry}>
+                            Thử lại
+                        </button>
                     )}
 
                     <Link to="/">Quay lại trang chủ</Link>
