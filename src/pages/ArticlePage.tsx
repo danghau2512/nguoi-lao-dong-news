@@ -13,12 +13,31 @@ import './ArticlePage.css'
         return <ArticleDetailView key={sourceUrl} sourceUrl={sourceUrl} />
     }
 
+    function isValidArticleUrl(sourceUrl: string) {
+        try {
+            const url = new URL(sourceUrl)
+
+            return (
+                url.origin === 'https://laodong.vn' &&
+                url.pathname.endsWith('.ldo')
+            )
+        } catch {
+            return false
+        }
+    }
+
     function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
         const [article, setArticle] = useState<ArticleDetail | null>(null)
         const [error, setError] = useState('')
 
+        const sourceError = !sourceUrl
+            ? 'Thiếu URL bài viết.'
+            : !isValidArticleUrl(sourceUrl)
+                ? 'URL bài viết không hợp lệ.'
+                : ''
+
         useEffect(() => {
-            if (!sourceUrl) return
+            if (sourceError) return
 
             let ignore = false
 
@@ -26,23 +45,32 @@ import './ArticlePage.css'
                 .then((detail) => {
                     if (!ignore) setArticle(detail)
                 })
-                .catch(() => {
-                    if (!ignore) setError('Không tải được bài viết.')
+                .catch((error: unknown) => {
+                    if (ignore) return
+
+                    setError(
+                        error instanceof Error && error.message
+                            ? error.message
+                            : 'Không tải được bài viết.'
+                    )
                 })
 
             return () => {
                 ignore = true
             }
-        }, [sourceUrl])
+        }, [sourceUrl, sourceError])
+
+        const errorMessage = sourceError || error
 
         if (!article) {
             return (
                 <section className="article-page">
-                    <p>
-                        {!sourceUrl
-                            ? 'Thiếu URL bài viết.'
-                            : error || 'Đang tải bài viết…'}
-                    </p>
+                    {errorMessage ? (
+                        <p role="alert">{errorMessage}</p>
+                    ) : (
+                        <p role="status">Đang tải bài viết…</p>
+                    )}
+
                     <Link to="/">Quay lại trang chủ</Link>
                 </section>
             )
