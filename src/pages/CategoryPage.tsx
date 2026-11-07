@@ -54,7 +54,13 @@ function CategoryNewsList(props: CategoryNewsListProps) {
     }
 
     if (articles.length === 0) {
-        return <NewsStatus type="empty" />
+        return (
+            <NewsStatus
+                type="empty"
+                title="Chuyên mục chưa có bài viết"
+                message="Nguồn RSS đã được tải thành công nhưng hiện chưa có bài viết nào để hiển thị."
+            />
+        )
     }
 
     return (
@@ -131,9 +137,23 @@ export default function CategoryPage() {
                         categorySlug={category.slug}
                     />
                 ) : (
-                    <p>
-                        Chuyên mục này hiện chưa được cấu hình nguồn RSS.
-                    </p>
+                    <div className="category-page-no-feed">
+                        <NewsStatus
+                            type="empty"
+                            title="Chuyên mục chưa có nguồn RSS"
+                            message={`Chuyên mục ${category.name} hiện chưa được cấu hình nguồn RSS. Bạn có thể xem tin tức tại các chuyên mục đã hỗ trợ.`}
+                        />
+
+                        <div className="category-page-other-links">
+                            <Link to="/chuyen-muc/thoi-su">
+                                Thời sự
+                            </Link>
+
+                            <Link to="/chuyen-muc/kinh-doanh">
+                                Kinh doanh
+                            </Link>
+                        </div>
+                    </div>
                 )}
             </div>
 
