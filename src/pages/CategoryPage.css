@@ -105,3 +105,45 @@
         font-size: 23px;
     }
 }
+
+.category-page-error {
+    width: 100%;
+}
+
+.category-page-retry {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.category-page-retry-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    background-color: #c92833;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.category-page-retry-button:hover {
+    background-color: #a91f29;
+}
+
+.category-page-retry-button:focus-visible {
+    outline: 2px solid #c92833;
+    outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+    .category-page-retry-button {
+        padding: 11px 20px;
+        font-size: 13px;
+    }
+}

@@ -12,24 +12,44 @@ type CategoryNewsListProps = {
 }
 
 function CategoryNewsList(props: CategoryNewsListProps) {
-    const { articles, status, error } = useCategoryNews(props.categorySlug)
+    const { articles, status, error, retry } = useCategoryNews(props.categorySlug)
 
     if (status === 'idle' || status === 'loading') {
         return <NewsStatus type="loading" />
     }
 
+
     if (status === 'failed') {
         let errorMessage = 'Không thể tải tin tức.'
 
-        if (error !== null) {
+        if (error !== null && error.trim() !== '') {
             errorMessage = error
         }
 
         return (
-            <NewsStatus
-                type="error"
-                message={errorMessage}
-            />
+            <div className="category-page-error">
+
+                <NewsStatus
+                    type="error"
+                    message={errorMessage}
+                />
+
+                <div className="category-page-retry">
+                    <button
+                        type="button"
+                        className="category-page-retry-button"
+                        onClick={retry}
+                    >
+                        <i
+                            className="fa-solid fa-rotate-right"
+                            aria-hidden="true"
+                        ></i>
+
+                        Thử lại
+                    </button>
+                </div>
+
+            </div>
         )
     }
 
