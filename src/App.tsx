@@ -15,7 +15,7 @@ export default function App() {
                 <Route index element={<HomePage />} />
                 <Route
                     path="chuyen-muc/:slug"
-                    element={<CategoryPage articles={mockNews} />}
+                    element={<CategoryPage />}
                 />
                 <Route
                     path="tim-kiem"

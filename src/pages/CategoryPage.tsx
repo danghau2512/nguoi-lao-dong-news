@@ -1,16 +1,66 @@
 
 import { Link, useParams } from 'react-router-dom'
-import type { NewsArticle } from '../types/news'
 import { categories } from '../constants/categories'
+import { rssFeeds } from '../constants/rssFeeds'
+import { useCategoryNews } from '../hooks/useCategoryNews'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './CategoryPage.css'
 
-type CategoryPageProps = {
-    articles: NewsArticle[]
+type CategoryNewsListProps = {
+    categorySlug: string
 }
 
-export default function CategoryPage(props: CategoryPageProps) {
+function CategoryNewsList(props: CategoryNewsListProps) {
+    const { articles, status, error } = useCategoryNews(props.categorySlug)
+
+    if (status === 'idle' || status === 'loading') {
+        return <NewsStatus type="loading" />
+    }
+
+    if (status === 'failed') {
+        let errorMessage = 'Không thể tải tin tức.'
+
+        if (error !== null) {
+            errorMessage = error
+        }
+
+        return (
+            <NewsStatus
+                type="error"
+                message={errorMessage}
+            />
+        )
+    }
+
+    if (articles.length === 0) {
+        return <NewsStatus type="empty" />
+    }
+
+    return (
+        <>
+            <p className="category-page-count">
+                Có {articles.length} bài viết
+            </p>
+
+            <div className="category-page-news-list">
+                {articles.map((news) => (
+                    <NewsCard
+                        key={news.id}
+                        id={news.id}
+                        title={news.title}
+                        description={news.description}
+                        imageUrl={news.imageUrl}
+                        categorySlug={news.categorySlug}
+                        sourceUrl={news.sourceUrl}
+                    />
+                ))}
+            </div>
+        </>
+    )
+}
+
+export default function CategoryPage() {
     const { slug } = useParams<{ slug: string }>()
 
     const category = categories.find((item) => {
@@ -29,8 +79,8 @@ export default function CategoryPage(props: CategoryPageProps) {
         )
     }
 
-    const categoryArticles = props.articles.filter((article) => {
-        return article.categorySlug === slug
+    const rssFeed = rssFeeds.find((item) => {
+        return item.categorySlug === slug
     })
 
     return (
@@ -39,7 +89,10 @@ export default function CategoryPage(props: CategoryPageProps) {
             <div className="category-page-breadcrumb">
                 <Link to="/">Trang chủ</Link>
 
-                <i className="fa-solid fa-chevron-right"></i>
+                <i
+                    className="fa-solid fa-chevron-right"
+                    aria-hidden="true"
+                ></i>
 
                 <span>{category.name}</span>
             </div>
@@ -53,31 +106,15 @@ export default function CategoryPage(props: CategoryPageProps) {
             </div>
 
             <div className="category-page-content">
-
-                {categoryArticles.length > 0 ? (
-                    <>
-                        <p className="category-page-count">
-                            Có {categoryArticles.length} bài viết
-                        </p>
-
-                        <div className="category-page-news-list">
-                            {categoryArticles.map((news) => (
-                                <NewsCard
-                                    key={news.id}
-                                    id={news.id}
-                                    title={news.title}
-                                    description={news.description}
-                                    imageUrl={news.imageUrl}
-                                    categorySlug={news.categorySlug}
-                                    sourceUrl={news.sourceUrl}
-                                />
-                            ))}
-                        </div>
-                    </>
+                {rssFeed !== undefined ? (
+                    <CategoryNewsList
+                        categorySlug={category.slug}
+                    />
                 ) : (
-                    <NewsStatus type="empty" />
+                    <p>
+                        Chuyên mục này hiện chưa được cấu hình nguồn RSS.
+                    </p>
                 )}
-
             </div>
 
         </div>
