@@ -9,7 +9,35 @@ import './SearchPage.css'
 
 export default function SearchPage() {
     const [searchParams] = useSearchParams()
-    const { articles, status, error } = useCategoryNews('thoi-su')
+
+    const thoiSu = useCategoryNews('thoi-su')
+    const kinhDoanh = useCategoryNews('kinh-doanh')
+
+    const articles: NewsArticle[] = [
+        ...thoiSu.articles,
+        ...kinhDoanh.articles
+    ]
+
+    let isLoading = false
+
+    if (
+        thoiSu.status === 'idle' ||
+        thoiSu.status === 'loading' ||
+        kinhDoanh.status === 'idle' ||
+        kinhDoanh.status === 'loading'
+    ) {
+        isLoading = true
+    }
+
+    let bothFailed = false
+
+    if (
+        thoiSu.status === 'failed' &&
+        kinhDoanh.status === 'failed'
+    ) {
+        bothFailed = true
+    }
+
 
     const queryValue = searchParams.get('q')
 
@@ -96,14 +124,15 @@ export default function SearchPage() {
                             trên Header hoặc Footer.
                         </p>
                     </div>
-                ) : (status === 'idle' || status === 'loading') ? (
+                ) : isLoading === true ? (
                     <NewsStatus type="loading" />
-                ) : status === 'failed' ? (
+                ) : bothFailed === true ? (
                     <NewsStatus
                         type="error"
-                        message={error ?? undefined}
+                        message="Không thể tải dữ liệu từ cả hai nguồn RSS."
                     />
                 ) : (
+
                     <>
                         <p className="search-page-count">
                             Tìm thấy {searchResults.length} bài viết
