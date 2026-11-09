@@ -2,7 +2,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import type { NewsArticle } from '../types/news'
 import { useCategoryNews } from '../hooks/useCategoryNews'
-import { categories } from '../constants/categories'
+import { searchArticles } from '../services/newsService'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './SearchPage.css'
@@ -38,7 +38,6 @@ export default function SearchPage() {
         bothFailed = true
     }
 
-
     const queryValue = searchParams.get('q')
 
     let searchKeyword = ''
@@ -47,39 +46,7 @@ export default function SearchPage() {
         searchKeyword = queryValue.trim()
     }
 
-    const normalizedKeyword = searchKeyword.toLocaleLowerCase('vi-VN')
-
-    let searchResults: NewsArticle[] = []
-
-    if (normalizedKeyword !== '') {
-        searchResults = articles.filter((article) => {
-            const title = article.title.toLocaleLowerCase('vi-VN')
-            const description = article.description.toLocaleLowerCase('vi-VN')
-
-            let categoryName = ''
-
-            for (const category of categories) {
-                if (category.slug === article.categorySlug) {
-                    categoryName = category.name.toLocaleLowerCase('vi-VN')
-                    break
-                }
-            }
-
-            if (title.includes(normalizedKeyword)) {
-                return true
-            }
-
-            if (description.includes(normalizedKeyword)) {
-                return true
-            }
-
-            if (categoryName.includes(normalizedKeyword)) {
-                return true
-            }
-
-            return false
-        })
-    }
+    const searchResults = searchArticles(articles, searchKeyword)
 
     return (
         <div className="search-page">
@@ -132,7 +99,6 @@ export default function SearchPage() {
                         message="Không thể tải dữ liệu từ cả hai nguồn RSS."
                     />
                 ) : (
-
                     <>
                         <p className="search-page-count">
                             Tìm thấy {searchResults.length} bài viết
