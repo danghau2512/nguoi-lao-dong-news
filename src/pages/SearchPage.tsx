@@ -38,6 +38,33 @@ export default function SearchPage() {
         bothFailed = true
     }
 
+    let hasOneFailed = false
+    let failedFeedName = ''
+
+    if (
+        thoiSu.status === 'failed' &&
+        kinhDoanh.status !== 'failed'
+    ) {
+        hasOneFailed = true
+        failedFeedName = 'Thời sự'
+    } else if (
+        kinhDoanh.status === 'failed' &&
+        thoiSu.status !== 'failed'
+    ) {
+        hasOneFailed = true
+        failedFeedName = 'Kinh doanh'
+    }
+
+    function handleRetry() {
+        if (thoiSu.status === 'failed') {
+            thoiSu.retry()
+        }
+
+        if (kinhDoanh.status === 'failed') {
+            kinhDoanh.retry()
+        }
+    }
+
     const queryValue = searchParams.get('q')
 
     let searchKeyword = ''
@@ -94,12 +121,70 @@ export default function SearchPage() {
                 ) : isLoading === true ? (
                     <NewsStatus type="loading" />
                 ) : bothFailed === true ? (
-                    <NewsStatus
-                        type="error"
-                        message="Không thể tải dữ liệu từ cả hai nguồn RSS."
-                    />
+                    <div className="search-page-error">
+
+                        <NewsStatus
+                            type="error"
+                            message="Không thể tải dữ liệu từ cả hai nguồn RSS."
+                        />
+
+                        <div className="search-page-retry">
+                            <button
+                                type="button"
+                                className="search-page-retry-button"
+                                onClick={handleRetry}
+                            >
+                                <i
+                                    className="fa-solid fa-rotate-right"
+                                    aria-hidden="true"
+                                ></i>
+
+                                Thử lại
+                            </button>
+                        </div>
+
+                    </div>
                 ) : (
                     <>
+                        {hasOneFailed === true ? (
+                            <div
+                                className="search-page-warning"
+                                role="alert"
+                            >
+                                <div className="search-page-warning-content">
+                                    <i
+                                        className="fa-solid fa-triangle-exclamation"
+                                        aria-hidden="true"
+                                    ></i>
+
+                                    <div>
+                                        <h2>
+                                            Không thể tải RSS {failedFeedName}
+                                        </h2>
+
+                                        <p>
+                                            Kết quả tìm kiếm có thể chưa được
+                                            cập nhật đầy đủ. Bạn có thể thử
+                                            tải lại nguồn RSS bị lỗi.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="search-page-retry-button"
+                                    onClick={handleRetry}
+                                >
+                                    <i
+                                        className="fa-solid fa-rotate-right"
+                                        aria-hidden="true"
+                                    ></i>
+
+                                    Thử lại
+                                </button>
+                            </div>
+                        ) : null}
+
                         <p className="search-page-count">
                             Tìm thấy {searchResults.length} bài viết
                             phù hợp với từ khóa
@@ -121,7 +206,11 @@ export default function SearchPage() {
                                 ))}
                             </div>
                         ) : (
-                            <NewsStatus type="empty" />
+                            <NewsStatus
+                                type="empty"
+                                title="Không tìm thấy bài viết"
+                                message="Không có bài viết nào phù hợp với từ khóa bạn đã nhập trong dữ liệu hiện có."
+                            />
                         )}
                     </>
                 )}
