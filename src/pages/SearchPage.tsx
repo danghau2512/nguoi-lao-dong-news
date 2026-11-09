@@ -1,19 +1,15 @@
 
 import { Link, useSearchParams } from 'react-router-dom'
 import type { NewsArticle } from '../types/news'
+import { useCategoryNews } from '../hooks/useCategoryNews'
 import { categories } from '../constants/categories'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './SearchPage.css'
 
-type SearchPageProps = {
-    articles: NewsArticle[]
-    isLoading?: boolean
-    error?: string | null
-}
-
-export default function SearchPage(props: SearchPageProps) {
+export default function SearchPage() {
     const [searchParams] = useSearchParams()
+    const { articles, status, error } = useCategoryNews('thoi-su')
 
     const queryValue = searchParams.get('q')
 
@@ -28,7 +24,7 @@ export default function SearchPage(props: SearchPageProps) {
     let searchResults: NewsArticle[] = []
 
     if (normalizedKeyword !== '') {
-        searchResults = props.articles.filter((article) => {
+        searchResults = articles.filter((article) => {
             const title = article.title.toLocaleLowerCase('vi-VN')
             const description = article.description.toLocaleLowerCase('vi-VN')
 
@@ -100,14 +96,12 @@ export default function SearchPage(props: SearchPageProps) {
                             trên Header hoặc Footer.
                         </p>
                     </div>
-                ) : props.isLoading === true ? (
+                ) : (status === 'idle' || status === 'loading') ? (
                     <NewsStatus type="loading" />
-                ) : props.error !== undefined &&
-                props.error !== null &&
-                props.error.trim() !== '' ? (
+                ) : status === 'failed' ? (
                     <NewsStatus
                         type="error"
-                        message={props.error}
+                        message={error ?? undefined}
                     />
                 ) : (
                     <>
