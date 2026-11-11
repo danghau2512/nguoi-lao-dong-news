@@ -1,50 +1,116 @@
-import { Link, useParams } from 'react-router-dom'
-import {mockNews} from "../data/mockNews.ts";
-import { categories } from '../constants/categories'
-
-import MockArticleContent from '../components/article/MockArticleContent'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { fetchArticleDetail } from '../services/articleService'
 import './ArticlePage.css'
 
-export default function ArticlePage() {
-    const { id } = useParams<{ id: string }>()
 
-    const article = mockNews.find(item => item.id === id)
+    type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
-    if (!article) {
-        return (
-            <section className={`article-page`}>
-                <h2>Không tìm thấy bài viết</h2>
-                <p>Bài viết không có trong dữ liệu mẫu hiện tại.</p>
-                <Link to="/">Quay lại trang chủ</Link>
-            </section>
-        )
+    export default function ArticlePage() {
+        const [searchParams] = useSearchParams()
+        const sourceUrl = searchParams.get('url')?.trim() ?? ''
+
+        return <ArticleDetailView key={sourceUrl} sourceUrl={sourceUrl} />
     }
 
-    const category = categories.find(
-        (item) => item.slug === article.categorySlug
-    )
+    function isValidArticleUrl(sourceUrl: string) {
+        try {
+            const url = new URL(sourceUrl)
 
+            return (
+                url.origin === 'https://laodong.vn' &&
+                url.pathname.endsWith('.ldo')
+            )
+        } catch {
+            return false
+        }
+    }
+
+    function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
+        const [article, setArticle] = useState<ArticleDetail | null>(null)
+        const [error, setError] = useState('')
+
+        const [retryCount, setRetryCount] = useState(0)
+
+        function handleRetry() {
+            setError('')
+            setRetryCount((count) => count + 1)
+        }
+
+        const sourceError = !sourceUrl
+            ? 'Thiếu URL bài viết.'
+            : !isValidArticleUrl(sourceUrl)
+                ? 'URL bài viết không hợp lệ.'
+                : ''
+
+        useEffect(() => {
+            if (sourceError) return
+
+            let ignore = false
+
+            fetchArticleDetail(sourceUrl)
+                .then((detail) => {
+                    if (!ignore) setArticle(detail)
+                })
+                .catch((error: unknown) => {
+                    if (ignore) return
+
+                    setError(
+                        error instanceof Error && error.message
+                            ? error.message
+                            : 'Không tải được bài viết.'
+                    )
+                })
+
+            return () => {
+                ignore = true
+            }
+        }, [sourceUrl, sourceError, retryCount])
+
+        const errorMessage = sourceError || error
+
+        if (!article) {
+            return (
+                <section className="article-page">
+                    {errorMessage ? (
+                        <p role="alert">{errorMessage}</p>
+                    ) : (
+                        <p role="status">Đang tải bài viết…</p>
+                    )}
+
+                    {error && !sourceError && (
+                        <button type="button" onClick={handleRetry}>
+                            Thử lại
+                        </button>
+                    )}
+
+                    <Link to="/">Quay lại trang chủ</Link>
+                </section>
+            )
+        }
     return (
         <article className="article-page">
             <header className="article-page__header">
-                <p className="article-page__notice">
-                    Dữ liệu mẫu — chưa lấy từ báo Người Lao Động.
-                </p>
+                <h1 className="article-page__title">{article.title}</h1>
 
-                <p className="article-page__category">
-                    {category?.name ?? 'Chưa có chuyên mục'}
-                </p>
+                {article.description && (
+                    <p className="article-page__description">{article.description}</p>
+                )}
 
-                <h1 className="article-page__title">
-                    {article.title}
-                </h1>
+                {article.author && <p>{article.author}</p>}
 
-                <p className="article-page__description">
-                    {article.description}
-                </p>
+                {article.publishedAt && (
+                    <time dateTime={article.publishedAt}>
+                        {new Date(article.publishedAt).toLocaleString('vi-VN', {
+                            timeZone: 'Asia/Ho_Chi_Minh',
+                        })}
+                    </time>
+                )}
             </header>
 
-            <MockArticleContent articleId={article.id} />
+            <div
+                className="article-page__content"
+                dangerouslySetInnerHTML={{ __html: article.contentHtml }}/>
 
             <Link className="article-page__back" to="/"> Quay lại trang chủ </Link>
         </article>
