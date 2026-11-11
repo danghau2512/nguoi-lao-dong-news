@@ -3,6 +3,7 @@ import './NewsStatus.css'
 
 type NewsStatusProps = {
     type: 'loading' | 'error' | 'empty'
+    title?: string
     message?: string
 }
 
@@ -45,6 +46,23 @@ export default function NewsStatus(props: NewsStatusProps) {
         )
     }
 
+    let emptyTitle = 'Chưa có bài viết'
+    let emptyMessage = 'Hiện tại chưa có tin tức để hiển thị.'
+
+    if (
+        props.title !== undefined &&
+        props.title.trim() !== ''
+    ) {
+        emptyTitle = props.title
+    }
+
+    if (
+        props.message !== undefined &&
+        props.message.trim() !== ''
+    ) {
+        emptyMessage = props.message
+    }
+
     return (
         <div className="news-status" role="status">
             <i
@@ -52,9 +70,9 @@ export default function NewsStatus(props: NewsStatusProps) {
                 aria-hidden="true"
             ></i>
 
-            <h3>Chưa có bài viết</h3>
+            <h3>{emptyTitle}</h3>
 
-            <p>Hiện tại chưa có tin tức để hiển thị.</p>
+            <p>{emptyMessage}</p>
         </div>
     )
 }

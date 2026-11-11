@@ -5,7 +5,6 @@ import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/SearchPage'
-import { mockNews } from './data/mockNews'
 
 export default function App() {
     return (
@@ -15,11 +14,11 @@ export default function App() {
                 <Route index element={<HomePage />} />
                 <Route
                     path="chuyen-muc/:slug"
-                    element={<CategoryPage articles={mockNews} />}
+                    element={<CategoryPage />}
                 />
                 <Route
                     path="tim-kiem"
-                    element={<SearchPage articles={mockNews} />}
+                    element={<SearchPage />}
                 />
                 <Route
                     path="bai-viet/:id"

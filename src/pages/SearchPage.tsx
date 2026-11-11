@@ -1,19 +1,69 @@
 
 import { Link, useSearchParams } from 'react-router-dom'
 import type { NewsArticle } from '../types/news'
-import { categories } from '../constants/categories'
+import { useCategoryNews } from '../hooks/useCategoryNews'
+import { searchArticles } from '../services/newsService'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
 import './SearchPage.css'
 
-type SearchPageProps = {
-    articles: NewsArticle[]
-    isLoading?: boolean
-    error?: string | null
-}
-
-export default function SearchPage(props: SearchPageProps) {
+export default function SearchPage() {
     const [searchParams] = useSearchParams()
+
+    const thoiSu = useCategoryNews('thoi-su')
+    const kinhDoanh = useCategoryNews('kinh-doanh')
+
+    const articles: NewsArticle[] = [
+        ...thoiSu.articles,
+        ...kinhDoanh.articles
+    ]
+
+    let isLoading = false
+
+    if (
+        thoiSu.status === 'idle' ||
+        thoiSu.status === 'loading' ||
+        kinhDoanh.status === 'idle' ||
+        kinhDoanh.status === 'loading'
+    ) {
+        isLoading = true
+    }
+
+    let bothFailed = false
+
+    if (
+        thoiSu.status === 'failed' &&
+        kinhDoanh.status === 'failed'
+    ) {
+        bothFailed = true
+    }
+
+    let hasOneFailed = false
+    let failedFeedName = ''
+
+    if (
+        thoiSu.status === 'failed' &&
+        kinhDoanh.status !== 'failed'
+    ) {
+        hasOneFailed = true
+        failedFeedName = 'Thời sự'
+    } else if (
+        kinhDoanh.status === 'failed' &&
+        thoiSu.status !== 'failed'
+    ) {
+        hasOneFailed = true
+        failedFeedName = 'Kinh doanh'
+    }
+
+    function handleRetry() {
+        if (thoiSu.status === 'failed') {
+            thoiSu.retry()
+        }
+
+        if (kinhDoanh.status === 'failed') {
+            kinhDoanh.retry()
+        }
+    }
 
     const queryValue = searchParams.get('q')
 
@@ -23,39 +73,7 @@ export default function SearchPage(props: SearchPageProps) {
         searchKeyword = queryValue.trim()
     }
 
-    const normalizedKeyword = searchKeyword.toLocaleLowerCase('vi-VN')
-
-    let searchResults: NewsArticle[] = []
-
-    if (normalizedKeyword !== '') {
-        searchResults = props.articles.filter((article) => {
-            const title = article.title.toLocaleLowerCase('vi-VN')
-            const description = article.description.toLocaleLowerCase('vi-VN')
-
-            let categoryName = ''
-
-            for (const category of categories) {
-                if (category.slug === article.categorySlug) {
-                    categoryName = category.name.toLocaleLowerCase('vi-VN')
-                    break
-                }
-            }
-
-            if (title.includes(normalizedKeyword)) {
-                return true
-            }
-
-            if (description.includes(normalizedKeyword)) {
-                return true
-            }
-
-            if (categoryName.includes(normalizedKeyword)) {
-                return true
-            }
-
-            return false
-        })
-    }
+    const searchResults = searchArticles(articles, searchKeyword)
 
     return (
         <div className="search-page">
@@ -100,17 +118,73 @@ export default function SearchPage(props: SearchPageProps) {
                             trên Header hoặc Footer.
                         </p>
                     </div>
-                ) : props.isLoading === true ? (
+                ) : isLoading === true ? (
                     <NewsStatus type="loading" />
-                ) : props.error !== undefined &&
-                props.error !== null &&
-                props.error.trim() !== '' ? (
-                    <NewsStatus
-                        type="error"
-                        message={props.error}
-                    />
+                ) : bothFailed === true ? (
+                    <div className="search-page-error">
+
+                        <NewsStatus
+                            type="error"
+                            message="Không thể tải dữ liệu từ cả hai nguồn RSS."
+                        />
+
+                        <div className="search-page-retry">
+                            <button
+                                type="button"
+                                className="search-page-retry-button"
+                                onClick={handleRetry}
+                            >
+                                <i
+                                    className="fa-solid fa-rotate-right"
+                                    aria-hidden="true"
+                                ></i>
+
+                                Thử lại
+                            </button>
+                        </div>
+
+                    </div>
                 ) : (
                     <>
+                        {hasOneFailed === true ? (
+                            <div
+                                className="search-page-warning"
+                                role="alert"
+                            >
+                                <div className="search-page-warning-content">
+                                    <i
+                                        className="fa-solid fa-triangle-exclamation"
+                                        aria-hidden="true"
+                                    ></i>
+
+                                    <div>
+                                        <h2>
+                                            Không thể tải RSS {failedFeedName}
+                                        </h2>
+
+                                        <p>
+                                            Kết quả tìm kiếm có thể chưa được
+                                            cập nhật đầy đủ. Bạn có thể thử
+                                            tải lại nguồn RSS bị lỗi.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="search-page-retry-button"
+                                    onClick={handleRetry}
+                                >
+                                    <i
+                                        className="fa-solid fa-rotate-right"
+                                        aria-hidden="true"
+                                    ></i>
+
+                                    Thử lại
+                                </button>
+                            </div>
+                        ) : null}
+
                         <p className="search-page-count">
                             Tìm thấy {searchResults.length} bài viết
                             phù hợp với từ khóa
@@ -132,7 +206,11 @@ export default function SearchPage(props: SearchPageProps) {
                                 ))}
                             </div>
                         ) : (
-                            <NewsStatus type="empty" />
+                            <NewsStatus
+                                type="empty"
+                                title="Không tìm thấy bài viết"
+                                message="Không có bài viết nào phù hợp với từ khóa bạn đã nhập trong dữ liệu hiện có."
+                            />
                         )}
                     </>
                 )}
