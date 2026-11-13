@@ -12,6 +12,7 @@ import {
 import './ArticlePage.css'
 import ArticleComments from "../components/ArticleComments.tsx";
 import './ArticleSave.css'
+import ArticleToolbar from "../components/ArticleToolbar.tsx";
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
