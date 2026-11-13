@@ -4,6 +4,7 @@ import type { FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { categories } from '../constants/categories'
 import './Header.css'
+import {useEffect} from "react";
 
 const languages = [
     {
@@ -38,10 +39,24 @@ const languages = [
     }
 ]
 
+type Theme = 'light' | 'dark'
+
+function getSavedTheme(): Theme {
+    const savedTheme = localStorage.getItem('goc-tin-theme')
+    return savedTheme === 'dark' ? 'dark' : 'light'
+}
+
 export default function Header() {
     const [searchKeyword, setSearchKeyword] = useState('')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
+
+    const [theme, setTheme] = useState<Theme>(getSavedTheme)
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme
+        localStorage.setItem('goc-tin-theme', theme)
+    }, [theme])
 
     const mainCategories = categories.slice(0, 7)
 
@@ -168,6 +183,20 @@ export default function Header() {
                             ></i>
                         </button>
                     </form>
+
+                    <label className="news-header-theme">
+                        <span>Giao diện</span>
+
+                        <select
+                            value={theme}
+                            onChange={(event) =>
+                                setTheme(event.target.value === 'dark' ? 'dark' : 'light')
+                            }
+                        >
+                            <option value="light">Sáng</option>
+                            <option value="dark">Tối</option>
+                        </select>
+                    </label>
 
                 </div>
             </div>

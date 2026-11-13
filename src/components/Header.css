@@ -553,3 +553,18 @@
         grid-template-columns: 1fr 1fr;
     }
 }
+.news-header-theme {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.news-header-theme select {
+    padding: 7px 10px;
+    border: 1px solid var(--theme-border);
+    border-radius: 6px;
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
+    font: inherit;
+}
