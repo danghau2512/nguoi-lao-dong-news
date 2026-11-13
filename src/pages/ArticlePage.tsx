@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { fetchArticleDetail } from '../services/articleService'
 import './ArticlePage.css'
+import ArticleToolbar from "../components/ArticleToolbar.tsx";
 
 
     type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
@@ -97,15 +98,11 @@ import './ArticlePage.css'
                     <p className="article-page__description">{article.description}</p>
                 )}
 
-                {article.author && <p>{article.author}</p>}
+                <ArticleToolbar
+                    author={article.author}
+                    publishedAt={article.publishedAt}
+                />
 
-                {article.publishedAt && (
-                    <time dateTime={article.publishedAt}>
-                        {new Date(article.publishedAt).toLocaleString('vi-VN', {
-                            timeZone: 'Asia/Ho_Chi_Minh',
-                        })}
-                    </time>
-                )}
             </header>
 
             <div
