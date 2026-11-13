@@ -1,0 +1,142 @@
+
+.article-save-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 10000;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    min-height: 70px;
+    box-sizing: border-box;
+
+    padding: 16px;
+    border: 1px solid #d4e9da;
+    border-left: 4px solid #198754;
+    border-radius: 8px;
+
+    background-color: #ffffff;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: left;
+
+    animation: article-toast-show 0.25s ease-out;
+}
+
+.article-save-toast-success {
+    border-left-color: #198754;
+}
+
+.article-save-toast-error {
+    border-left-color: #dc3545;
+    border-color: #f0c6cb;
+}
+
+.article-save-toast-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+    color: #198754;
+}
+
+.article-save-toast-error .article-save-toast-icon {
+    color: #dc3545;
+}
+
+.article-save-toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.article-save-toast-content strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #222;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.article-save-toast-content p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.article-save-toast-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #777;
+
+    cursor: pointer;
+}
+
+.article-save-toast-close:hover {
+    background-color: #f2f2f2;
+    color: #222;
+}
+
+.article-save-toast-close:focus-visible {
+    outline: 2px solid #c92833;
+    outline-offset: 2px;
+}
+
+.article-toolbar__actions button[aria-pressed="true"] {
+    border-color: #c92833;
+    background-color: #fff2f3;
+    color: #c92833;
+}
+
+@keyframes article-toast-show {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .article-save-toast {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+        padding: 14px;
+    }
+
+    .article-save-toast-content strong {
+        font-size: 14px;
+    }
+
+    .article-save-toast-content p {
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .article-save-toast {
+        animation: none;
+    }
+}
