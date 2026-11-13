@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { fetchArticleDetail } from '../services/articleService'
 import './ArticlePage.css'
 import ArticleToolbar from "../components/ArticleToolbar.tsx";
+import ArticleComments from "../components/ArticleComments.tsx";
 
 
     type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
@@ -37,7 +38,9 @@ import ArticleToolbar from "../components/ArticleToolbar.tsx";
             setError('')
             setRetryCount((count) => count + 1)
         }
-
+        function focusCommentInput() {
+            document.getElementById('article-comment-content')?.focus()
+        }
         const sourceError = !sourceUrl
             ? 'Thiếu URL bài viết.'
             : !isValidArticleUrl(sourceUrl)
@@ -99,6 +102,7 @@ import ArticleToolbar from "../components/ArticleToolbar.tsx";
                 )}
 
                 <ArticleToolbar
+                    onFeedback={focusCommentInput}
                     author={article.author}
                     publishedAt={article.publishedAt}
                 />
@@ -108,7 +112,7 @@ import ArticleToolbar from "../components/ArticleToolbar.tsx";
             <div
                 className="article-page__content"
                 dangerouslySetInnerHTML={{ __html: article.contentHtml }}/>
-
+            <ArticleComments key={sourceUrl} sourceUrl={sourceUrl} />
             <Link className="article-page__back" to="/"> Quay lại trang chủ </Link>
         </article>
     )
