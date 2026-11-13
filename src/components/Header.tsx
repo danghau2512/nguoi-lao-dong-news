@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { UserRound } from 'lucide-react'
+import { Leaf, Moon, Sun, UserRound } from 'lucide-react'
 import { categories } from '../constants/categories'
 import './Header.css'
 import {useEffect} from "react";
@@ -221,26 +221,37 @@ export default function Header() {
 
                     </div>
 
-                    <label className="news-header-theme">
-                        <span>Giao diện</span>
-
-                        <select
-                            value={theme}
-                            onChange={(event) => {
-                                const selectedTheme = event.target.value
-
-                                if (selectedTheme === 'dark' || selectedTheme === 'sepia') {
-                                    setTheme(selectedTheme)
-                                } else {
-                                    setTheme('light')
-                                }
-                            }}
+                    <div className="news-header-theme" role="group" aria-label="Chế độ giao diện">
+                        <button
+                            type="button"
+                            title="Sáng"
+                            aria-label="Chế độ sáng"
+                            aria-pressed={theme === 'light'}
+                            onClick={() => setTheme('light')}
                         >
-                            <option value="light">Sáng</option>
-                            <option value="dark">Tối</option>
-                            <option value="sepia">Dịu mắt</option>
-                        </select>
-                    </label>
+                            <Sun size={18} aria-hidden="true" />
+                        </button>
+
+                        <button
+                            type="button"
+                            title="Tối"
+                            aria-label="Chế độ tối"
+                            aria-pressed={theme === 'dark'}
+                            onClick={() => setTheme('dark')}
+                        >
+                            <Moon size={18} aria-hidden="true" />
+                        </button>
+
+                        <button
+                            type="button"
+                            title="Dịu mắt"
+                            aria-label="Chế độ dịu mắt"
+                            aria-pressed={theme === 'sepia'}
+                            onClick={() => setTheme('sepia')}
+                        >
+                            <Leaf size={18} aria-hidden="true" />
+                        </button>
+                    </div>
 
                 </div>
             </div>
