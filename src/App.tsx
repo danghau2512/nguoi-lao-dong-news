@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import ArticlePage from './pages/ArticlePage'
 import CategoryPage from './pages/CategoryPage'
 import SearchPage from './pages/SearchPage'
+import PersonalPage from './pages/PersonalPage'
 
 export default function App() {
     return (
@@ -12,17 +13,25 @@ export default function App() {
             <Route path="/" element={<MainLayout />}>
 
                 <Route index element={<HomePage />} />
+
                 <Route
                     path="chuyen-muc/:slug"
                     element={<CategoryPage />}
                 />
+
                 <Route
                     path="tim-kiem"
                     element={<SearchPage />}
                 />
+
                 <Route
                     path="bai-viet/:id"
                     element={<ArticlePage />}
+                />
+
+                <Route
+                    path="ca-nhan"
+                    element={<PersonalPage />}
                 />
 
                 <Route
