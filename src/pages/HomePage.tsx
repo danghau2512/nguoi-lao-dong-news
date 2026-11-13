@@ -1,12 +1,40 @@
 
 import NewsCard from '../components/NewsCard'
-import { mockNews } from '../data/mockNews'
+import NewsStatus from '../components/NewsStatus'
 import './HomePage.css'
+import {useCategoryNews} from "../hooks/useCategoryNews.ts";
 
 export default function HomePage() {
-    const featuredNews = mockNews[0]
-    const latestNews = mockNews.slice(1, 3)
-    const smallNews = mockNews.slice(3, 8)
+    const { articles, status, error, retry } = useCategoryNews('thoi-su')
+
+    if (status === 'idle' || status === 'loading') {
+        return (
+            <div className="home-page">
+                <NewsStatus type="loading" />
+            </div>
+        )
+    }
+
+    if (status === 'failed') {
+        return (
+            <div className="home-page">
+                <NewsStatus type="error" message={error ?? undefined} />
+                <button type="button" onClick={retry}>Thử lại</button>
+            </div>
+        )
+    }
+
+    if (articles.length === 0) {
+        return (
+            <div className="home-page">
+                <NewsStatus type="empty" />
+            </div>
+        )
+    }
+
+    const featuredNews = articles[0]
+    const latestNews = articles.slice(1, 3)
+    const smallNews = articles.slice(3, 8)
 
     return (
         <div className="home-page">

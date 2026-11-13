@@ -21,8 +21,12 @@ export default function NewsCard(props: NewsCardProps) {
         }
     }
 
-    const articlePath = '/bai-viet/' + encodeURIComponent(props.id)
-
+    let articlePath = '/bai-viet/' + encodeURIComponent(props.id)
+    const sourceUrl = props.sourceUrl?.trim()
+    if (sourceUrl?.startsWith('https://laodong.vn/') && new URL(sourceUrl).pathname.endsWith('.ldo')) {
+        const params = new URLSearchParams({ url: sourceUrl })
+        articlePath += '?' + params.toString()
+    }
     return (
         <article className="news-card">
 
