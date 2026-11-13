@@ -31,6 +31,17 @@
 
   color-scheme: dark;
 }
+:root[data-theme='sepia'] {
+  --theme-bg: #f6eedf;
+  --theme-surface: #eee2cc;
+  --theme-text: #352c23;
+  --theme-muted: #665647;
+  --theme-border: #d9c8aa;
+  --theme-link: #205879;
+  --theme-accent: #9a2530;
+
+  color-scheme: light;
+}
 
 * {
   box-sizing: border-box;

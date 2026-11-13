@@ -103,3 +103,49 @@
 .article-page__content figcaption {
     color: var(--theme-muted);
 }
+@media print {
+    body:has(.article-page__content),
+    body:has(.article-page__content) .article-page {
+        --theme-bg: #fff;
+        --theme-text: #111;
+        --theme-muted: #444;
+        --theme-border: #ccc;
+        --theme-link: #111;
+
+        background-color: #fff;
+        color: #111;
+    }
+
+    body:has(.article-page__content) .news-header,
+    body:has(.article-page__content) .news-footer,
+    .article-page .article-toolbar__actions,
+    .article-page .article-comments,
+    .article-page .article-save-toast,
+    .article-page .article-page__back {
+        display: none;
+    }
+
+    .app-layout:has(.article-page__content),
+    .page-content:has(.article-page__content) {
+        display: block;
+        width: auto;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .article-page:has(.article-page__content) {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .article-page__content img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .article-page__content figure {
+        break-inside: avoid;
+    }
+}

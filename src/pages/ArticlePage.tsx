@@ -10,11 +10,12 @@ import {
     toggleSavedArticle
 } from '../services/personalStorage'
 import './ArticlePage.css'
-import ArticleToolbar from "../components/ArticleToolbar.tsx";
 import ArticleComments from "../components/ArticleComments.tsx";
 import './ArticleSave.css'
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
+
+const fontSizeLabels: Record<number, string> = {16: 'Nhỏ', 18: 'Vừa', 20: 'Lớn', 22: 'Rất lớn',}
 
 export default function ArticlePage() {
     const [searchParams] = useSearchParams()
@@ -40,6 +41,8 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
+
+    const [fontSize, setFontSize] = useState<number>()
 
     const [isSaved, setIsSaved] = useState(() => isArticleSaved(sourceUrl))
     const [saveMessage, setSaveMessage] = useState('')
@@ -143,9 +146,23 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
             )
         }
     }
-        function focusCommentInput() {
-            document.getElementById('article-comment-content')?.focus()
-        }
+
+    function focusCommentInput() {
+        document.getElementById('article-comment-content')?.focus()
+    }
+
+    function handleFontSizeChange(size: number) {
+        if (fontSize === size) return
+
+        setFontSize(size)
+        setSaveMessageType('success')
+        setSaveMessage(`Đã đổi cỡ chữ: ${fontSizeLabels[size]}`)
+    }
+
+    function handlePrint() {
+        window.print()
+    }
+
     function handleCloseNotification() {
         setSaveMessage('')
     }
@@ -226,15 +243,18 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
 
                 <ArticleToolbar
                     onFeedback={focusCommentInput}
+                    onPrint={handlePrint}
                     author={article.author}
                     publishedAt={article.publishedAt}
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
+                    onFontSizeChange={handleFontSizeChange}
                 />
             </header>
 
               <div
                   className="article-page__content"
+                  style={{ fontSize }}
                   dangerouslySetInnerHTML={{ __html: article.contentHtml }}
               />
 
