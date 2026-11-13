@@ -95,3 +95,16 @@
         font-size: 13px;
     }
 }
+:root[data-theme='dark'] .search-page-warning {
+    background-color: var(--theme-surface);
+    border-color: var(--theme-border);
+    border-left-color: #d38b25;
+}
+
+:root[data-theme='dark'] .search-page-warning-content h2 {
+    color: var(--theme-text);
+}
+
+:root[data-theme='dark'] .search-page-warning-content p {
+    color: var(--theme-muted);
+}

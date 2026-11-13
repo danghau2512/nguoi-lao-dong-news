@@ -2,8 +2,8 @@
 .news-footer {
     width: 100%;
     min-width: 1100px;
-    background-color: #fff;
-    color: #444;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -64,8 +64,8 @@
     align-items: center;
     flex-shrink: 0;
     overflow: hidden;
-    background-color: #fff;
-    border: 1px solid #fff;
+    background-color: var(--theme-bg);
+    border: 1px solid var(--theme-border);
     border-radius: 6px;
 }
 
@@ -78,13 +78,13 @@
     border: none;
     outline: none;
     background-color: transparent;
-    color: #333;
+    color: var(--theme-text);
     font-size: 13px;
     font-family: inherit;
 }
 
 .news-footer-search input::placeholder {
-    color: #999;
+    color: var(--theme-muted);
 }
 
 .news-footer-search button {
@@ -160,7 +160,7 @@
 
 .news-footer-information {
     padding: 45px 0;
-    background-color: #fafafa;
+    background-color: var(--theme-surface);
 }
 
 .news-footer-information-grid {
@@ -210,7 +210,7 @@
 .news-footer-description {
     max-width: 320px;
     margin: 0 0 24px;
-    color: #666;
+    color: var(--theme-muted);
     font-size: 14px;
     line-height: 1.8;
 }
@@ -223,7 +223,7 @@
 }
 
 .news-footer-source > span {
-    color: #777;
+    color: var(--theme-muted);
     font-size: 12px;
     font-weight: 600;
 }
@@ -249,7 +249,7 @@
 .news-footer-contact h3,
 .news-footer-connect h3 {
     margin: 8px 0 19px;
-    color: #333;
+    color: var(--theme-text);
     font-size: 17px;
     font-weight: 700;
 }
@@ -257,7 +257,7 @@
 .news-footer-contact p,
 .news-footer-connect p {
     margin: 0 0 18px;
-    color: #777;
+    color: var(--theme-muted);
     font-size: 13px;
     line-height: 1.8;
 }
@@ -267,7 +267,7 @@
     align-items: flex-start;
     gap: 11px;
     margin-bottom: 16px;
-    color: #555;
+    color: var(--theme-muted);
     font-size: 13px;
     line-height: 1.5;
     text-decoration: none;
@@ -362,8 +362,8 @@
 }
 
 .news-footer-bottom {
-    background-color: #f1f1f1;
-    border-top: 1px solid #e4e4e4;
+    background-color: var(--theme-surface);
+    border-top: 1px solid var(--theme-border);
 }
 
 .news-footer-bottom-inner {
@@ -377,7 +377,7 @@
 
 .news-footer-bottom p {
     margin: 0;
-    color: #777;
+    color: var(--theme-muted);
     font-size: 12px;
     line-height: 1.7;
 }

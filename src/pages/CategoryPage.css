@@ -13,21 +13,21 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 30px;
-    color: #777;
+    color: var(--theme-muted);
     font-size: 13px;
 }
 
 .category-page-breadcrumb a {
-    color: #777;
+    color: var(--theme-muted);
     text-decoration: none;
 }
 
 .category-page-breadcrumb a:hover {
-    color: #c92833;
+    color: var(--theme-accent);
 }
 
 .category-page-breadcrumb i {
-    color: #aaa;
+    color: var(--theme-muted);
     font-size: 10px;
 }
 
@@ -39,14 +39,14 @@
 
 .category-page-heading h1 {
     margin: 0 0 12px;
-    color: #292929;
+    color: var(--theme-text);
     font-size: 30px;
     font-weight: 700;
 }
 
 .category-page-heading p {
     margin: 0;
-    color: #777;
+    color: var(--theme-muted);
     font-size: 14px;
     line-height: 1.6;
 }
@@ -57,7 +57,7 @@
 
 .category-page-count {
     margin: 0 0 15px;
-    color: #888;
+    color: var(--theme-muted);
     font-size: 13px;
 }
 
@@ -167,7 +167,7 @@
     padding: 10px 20px;
     border: 1px solid #c92833;
     border-radius: 5px;
-    color: #c92833;
+    color: var(--theme-accent);
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
