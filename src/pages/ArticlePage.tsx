@@ -40,6 +40,8 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
 
+    const [fontSize, setFontSize] = useState<number>()
+
     const [isSaved, setIsSaved] = useState(() => isArticleSaved(sourceUrl))
     const [saveMessage, setSaveMessage] = useState('')
     const [saveMessageType, setSaveMessageType] =
@@ -236,11 +238,13 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                     publishedAt={article.publishedAt}
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
+                    onFontSizeChange={setFontSize}
                 />
             </header>
 
               <div
                   className="article-page__content"
+                  style={{ fontSize }}
                   dangerouslySetInnerHTML={{ __html: article.contentHtml }}
               />
 
