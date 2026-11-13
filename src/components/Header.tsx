@@ -2,9 +2,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { UserRound } from 'lucide-react'
 import { categories } from '../constants/categories'
 import './Header.css'
 import {useEffect} from "react";
+import './HeaderProfile.css'
 
 const languages = [
     {
@@ -110,8 +112,16 @@ export default function Header() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="news-header-language-link"
-                                title={'Mở phiên bản ' + language.name + ' của Báo Lao Động'}
-                                aria-label={'Mở phiên bản ' + language.name + ' của Báo Lao Động'}
+                                title={
+                                    'Mở phiên bản ' +
+                                    language.name +
+                                    ' của Báo Lao Động'
+                                }
+                                aria-label={
+                                    'Mở phiên bản ' +
+                                    language.name +
+                                    ' của Báo Lao Động'
+                                }
                             >
                                 <span
                                     className={'fi fi-' + language.flag}
@@ -147,42 +157,64 @@ export default function Header() {
                         </span>
                     </Link>
 
-                    <form
-                        className="news-header-search"
-                        onSubmit={handleSearch}
-                        role="search"
-                    >
-                        <label
-                            htmlFor="news-header-search-input"
-                            className="news-header-visually-hidden"
+                    <div className="news-header-controls">
+
+                        <form
+                            className="news-header-search"
+                            onSubmit={handleSearch}
+                            role="search"
                         >
-                            Tìm kiếm bài viết
-                        </label>
-
-                        <i
-                            className="fa-solid fa-magnifying-glass"
-                            aria-hidden="true"
-                        ></i>
-
-                        <input
-                            id="news-header-search-input"
-                            type="search"
-                            placeholder="Tìm kiếm tin tức..."
-                            value={searchKeyword}
-                            onChange={(event) => {
-                                setSearchKeyword(event.target.value)
-                            }}
-                        />
-
-                        <button type="submit" aria-label="Tìm kiếm">
-                            <span>Tìm kiếm</span>
+                            <label
+                                htmlFor="news-header-search-input"
+                                className="news-header-visually-hidden"
+                            >
+                                Tìm kiếm bài viết
+                            </label>
 
                             <i
                                 className="fa-solid fa-magnifying-glass"
                                 aria-hidden="true"
                             ></i>
-                        </button>
-                    </form>
+
+                            <input
+                                id="news-header-search-input"
+                                type="search"
+                                placeholder="Tìm kiếm tin tức..."
+                                value={searchKeyword}
+                                onChange={(event) => {
+                                    setSearchKeyword(event.target.value)
+                                }}
+                            />
+
+                            <button
+                                type="submit"
+                                aria-label="Tìm kiếm"
+                            >
+                                <span>Tìm kiếm</span>
+
+                                <i
+                                    className="fa-solid fa-magnifying-glass"
+                                    aria-hidden="true"
+                                ></i>
+                            </button>
+                        </form>
+
+                        <NavLink
+                            to="/ca-nhan"
+                            className="news-header-profile-link"
+                            aria-label="Trang cá nhân"
+                            title="Bài viết đã lưu và lịch sử đọc"
+                            onClick={() => {
+                                setIsMenuOpen(false)
+                            }}
+                        >
+                            <UserRound
+                                size={22}
+                                aria-hidden="true"
+                            />
+                        </NavLink>
+
+                    </div>
 
                     <label className="news-header-theme">
                         <span>Giao diện</span>
