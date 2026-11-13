@@ -10,7 +10,6 @@ import {
     toggleSavedArticle
 } from '../services/personalStorage'
 import './ArticlePage.css'
-import ArticleToolbar from "../components/ArticleToolbar.tsx";
 import ArticleComments from "../components/ArticleComments.tsx";
 import './ArticleSave.css'
 
@@ -142,14 +141,14 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 'Không thể lưu bài viết. Hãy kiểm tra bộ nhớ trình duyệt.'
             )
         }
-        function focusCommentInput() {
-            document.getElementById('article-comment-content')?.focus()
-        }
-        const sourceError = !sourceUrl
-            ? 'Thiếu URL bài viết.'
-            : !isValidArticleUrl(sourceUrl)
-                ? 'URL bài viết không hợp lệ.'
-                : ''
+    }
+
+    function focusCommentInput() {
+        document.getElementById('article-comment-content')?.focus()
+    }
+
+    function handlePrint() {
+        window.print()
     }
 
     function handleCloseNotification() {
@@ -232,6 +231,7 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
 
                 <ArticleToolbar
                     onFeedback={focusCommentInput}
+                    onPrint={handlePrint}
                     author={article.author}
                     publishedAt={article.publishedAt}
                     isSaved={isSaved}
