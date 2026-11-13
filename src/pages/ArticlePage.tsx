@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, CircleAlert, X } from 'lucide-react'
-import ArticleToolbar from '../components/ArticleToolbar'
+
 import { fetchArticleDetail } from '../services/articleService'
 import {
     isArticleSaved,
@@ -142,16 +142,10 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 'Không thể lưu bài viết. Hãy kiểm tra bộ nhớ trình duyệt.'
             )
         }
+    }
         function focusCommentInput() {
             document.getElementById('article-comment-content')?.focus()
         }
-        const sourceError = !sourceUrl
-            ? 'Thiếu URL bài viết.'
-            : !isValidArticleUrl(sourceUrl)
-                ? 'URL bài viết không hợp lệ.'
-                : ''
-    }
-
     function handleCloseNotification() {
         setSaveMessage('')
     }
