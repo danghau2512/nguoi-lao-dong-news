@@ -1,7 +1,7 @@
 .article-toolbar {
     margin-top: 20px;
     padding-top: 14px;
-    border-top: 1px solid #d9dde2;
+    border-top: 1px solid var(--theme-border);
     font-size: 14px;
 }
 
@@ -17,7 +17,7 @@
 .article-toolbar__meta {
     gap: 10px 16px;
     margin-bottom: 12px;
-    color: #59616d;
+    color: var(--theme-muted);
 }
 
 .article-toolbar__meta span,
@@ -28,34 +28,34 @@
 }
 
 .article-toolbar__meta strong {
-    color: #222;
+    color: var(--theme-text);
 }
 
 .article-toolbar button {
     min-height: 40px;
     padding: 0 12px;
-    border: 1px solid #d9dde2;
+    border: 1px solid var(--theme-border);
     border-radius: 2px;
-    background: #fff;
-    color: #222;
+    background: var(--theme-bg);
+    color: var(--theme-text);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
 }
 
 .article-toolbar button:disabled {
-    color: #68717c;
+    color: var(--theme-muted);
     cursor: default;
 }
 
 .article-toolbar button:not(:disabled):hover {
-    background: #f4f6f8;
+    background: var(--theme-surface);
 }
 
 .article-toolbar__sizes {
     gap: 2px;
     padding-left: 8px;
-    border-left: 1px solid #d9dde2;
+    border-left: 1px solid var(--theme-border);
 }
 
 .article-toolbar__sizes button {
