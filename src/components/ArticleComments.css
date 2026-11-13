@@ -1,0 +1,134 @@
+.article-comments {
+    margin: 32px 0 28px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e6eb;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #20252c;
+}
+
+.article-comments__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    font-size: 24px;
+}
+
+.article-comments__form,
+.article-comments__field {
+    display: grid;
+    gap: 12px;
+}
+
+.article-comments__field {
+    gap: 6px;
+}
+
+.article-comments__field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.article-comments__name {
+    width: 100%;
+    max-width: 320px;
+}
+
+.article-comments__field input,
+.article-comments__field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccd2da;
+    border-radius: 6px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+}
+
+.article-comments__field textarea {
+    min-height: 108px;
+    resize: vertical;
+    scroll-margin-top: 100px;
+}
+
+.article-comments__field input:focus,
+.article-comments__field textarea:focus {
+    outline: 2px solid #ba3349;
+    outline-offset: 2px;
+}
+
+.article-comments__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.article-comments__actions button {
+    min-height: 44px;
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 6px;
+    background: #ba3349;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.article-comments__actions button:hover {
+    background: #9e263b;
+}
+
+.article-comments__list {
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.article-comments__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid #edf0f3;
+}
+
+.article-comments__avatar {
+    display: grid;
+    flex: 0 0 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 50%;
+    background: #eef1f5;
+    color: #465364;
+    font-weight: 600;
+}
+
+.article-comments__body {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.article-comments__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+}
+
+.article-comments__meta time,
+.article-comments__empty {
+    color: #596473;
+    font-size: 14px;
+}
+
+.article-comments__body p {
+    margin: 4px 0 0;
+    white-space: pre-wrap;
+}
+
+.article-comments__error {
+    margin: 0;
+    color: #a12438;
+}

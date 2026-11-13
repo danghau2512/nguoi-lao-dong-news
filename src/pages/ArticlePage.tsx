@@ -10,6 +10,8 @@ import {
     toggleSavedArticle
 } from '../services/personalStorage'
 import './ArticlePage.css'
+import ArticleToolbar from "../components/ArticleToolbar.tsx";
+import ArticleComments from "../components/ArticleComments.tsx";
 import './ArticleSave.css'
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
@@ -140,6 +142,14 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 'Không thể lưu bài viết. Hãy kiểm tra bộ nhớ trình duyệt.'
             )
         }
+        function focusCommentInput() {
+            document.getElementById('article-comment-content')?.focus()
+        }
+        const sourceError = !sourceUrl
+            ? 'Thiếu URL bài viết.'
+            : !isValidArticleUrl(sourceUrl)
+                ? 'URL bài viết không hợp lệ.'
+                : ''
     }
 
     function handleCloseNotification() {
@@ -221,6 +231,7 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 ) : null}
 
                 <ArticleToolbar
+                    onFeedback={focusCommentInput}
                     author={article.author}
                     publishedAt={article.publishedAt}
                     isSaved={isSaved}
@@ -228,14 +239,16 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 />
             </header>
 
-            <div
-                className="article-page__content"
-                dangerouslySetInnerHTML={{ __html: article.contentHtml }}
-            />
+              <div
+                  className="article-page__content"
+                  dangerouslySetInnerHTML={{ __html: article.contentHtml }}
+              />
 
-            <Link className="article-page__back" to="/">
-                Quay lại trang chủ
-            </Link>
+              <ArticleComments key={sourceUrl} sourceUrl={sourceUrl} />
+
+              <Link className="article-page__back" to="/">
+                  Quay lại trang chủ
+              </Link>
         </article>
     )
 }
