@@ -41,11 +41,16 @@ const languages = [
     }
 ]
 
-type Theme = 'light' | 'dark'
+type Theme = 'light' | 'dark' | 'sepia'
 
 function getSavedTheme(): Theme {
     const savedTheme = localStorage.getItem('goc-tin-theme')
-    return savedTheme === 'dark' ? 'dark' : 'light'
+
+    if (savedTheme === 'dark' || savedTheme === 'sepia') {
+        return savedTheme
+    }
+
+    return 'light'
 }
 
 export default function Header() {
@@ -221,12 +226,19 @@ export default function Header() {
 
                         <select
                             value={theme}
-                            onChange={(event) =>
-                                setTheme(event.target.value === 'dark' ? 'dark' : 'light')
-                            }
+                            onChange={(event) => {
+                                const selectedTheme = event.target.value
+
+                                if (selectedTheme === 'dark' || selectedTheme === 'sepia') {
+                                    setTheme(selectedTheme)
+                                } else {
+                                    setTheme('light')
+                                }
+                            }}
                         >
                             <option value="light">Sáng</option>
                             <option value="dark">Tối</option>
+                            <option value="sepia">Dịu mắt</option>
                         </select>
                     </label>
 
