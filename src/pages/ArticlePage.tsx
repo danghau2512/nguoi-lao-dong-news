@@ -6,6 +6,7 @@ import ArticleToolbar from '../components/ArticleToolbar'
 import { fetchArticleDetail } from '../services/articleService'
 import {
     isArticleSaved,
+    recordArticleView,
     toggleSavedArticle
 } from '../services/personalStorage'
 import './ArticlePage.css'
@@ -63,6 +64,19 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 }
 
                 setArticle(detail)
+
+                try {
+                    recordArticleView({
+                        sourceUrl: sourceUrl,
+                        title: detail.title,
+                        description: detail.description
+                    })
+                } catch (storageError) {
+                    console.error(
+                        'Không thể lưu lịch sử xem bài:',
+                        storageError
+                    )
+                }
             })
             .catch((caughtError: unknown) => {
                 if (ignore) {
