@@ -15,6 +15,8 @@ import './ArticleSave.css'
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
+const fontSizeLabels: Record<number, string> = {16: 'Nhỏ', 18: 'Vừa', 20: 'Lớn', 22: 'Rất lớn',}
+
 export default function ArticlePage() {
     const [searchParams] = useSearchParams()
     const sourceUrl = searchParams.get('url')?.trim() ?? ''
@@ -149,6 +151,14 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
         document.getElementById('article-comment-content')?.focus()
     }
 
+    function handleFontSizeChange(size: number) {
+        if (fontSize === size) return
+
+        setFontSize(size)
+        setSaveMessageType('success')
+        setSaveMessage(`Đã đổi cỡ chữ: ${fontSizeLabels[size]}`)
+    }
+
     function handlePrint() {
         window.print()
     }
@@ -238,7 +248,7 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                     publishedAt={article.publishedAt}
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
-                    onFontSizeChange={setFontSize}
+                    onFontSizeChange={handleFontSizeChange}
                 />
             </header>
 
