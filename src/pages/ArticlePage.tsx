@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, CircleAlert, X } from 'lucide-react'
-import ArticleToolbar from '../components/ArticleToolbar'
+
 import { fetchArticleDetail } from '../services/articleService'
 import {
     isArticleSaved,
