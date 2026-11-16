@@ -9,20 +9,34 @@ import {
     recordArticleView,
     toggleSavedArticle
 } from '../services/personalStorage'
+
+import ArticleToolbar from '../components/ArticleToolbar'
+import ArticleComments from '../components/ArticleComments'
+import ArticleAiAssistant from '../components/ArticleAiAssistant'
+
 import './ArticlePage.css'
-import ArticleComments from "../components/ArticleComments.tsx";
 import './ArticleSave.css'
-import ArticleToolbar from "../components/ArticleToolbar.tsx";
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
-const fontSizeLabels: Record<number, string> = {16: 'Nhỏ', 18: 'Vừa', 20: 'Lớn', 22: 'Rất lớn',}
+const fontSizeLabels: Record<number, string> = {
+    16: 'Nhỏ',
+    18: 'Vừa',
+    20: 'Lớn',
+    22: 'Rất lớn'
+}
 
 export default function ArticlePage() {
     const [searchParams] = useSearchParams()
+
     const sourceUrl = searchParams.get('url')?.trim() ?? ''
 
-    return <ArticleDetailView key={sourceUrl} sourceUrl={sourceUrl} />
+    return (
+        <ArticleDetailView
+            key={sourceUrl}
+            sourceUrl={sourceUrl}
+        />
+    )
 }
 
 function isValidArticleUrl(sourceUrl: string): boolean {
@@ -38,23 +52,33 @@ function isValidArticleUrl(sourceUrl: string): boolean {
     }
 }
 
-function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
+function ArticleDetailView({
+                               sourceUrl
+                           }: {
+    sourceUrl: string
+}) {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
 
     const [fontSize, setFontSize] = useState<number>()
 
-    const [isSaved, setIsSaved] = useState(() => isArticleSaved(sourceUrl))
+    const [isSaved, setIsSaved] = useState(() => {
+        return isArticleSaved(sourceUrl)
+    })
+
     const [saveMessage, setSaveMessage] = useState('')
+
     const [saveMessageType, setSaveMessageType] =
         useState<'success' | 'error'>('success')
 
-    const sourceError = !sourceUrl
-        ? 'Thiếu URL bài viết.'
-        : !isValidArticleUrl(sourceUrl)
-            ? 'URL bài viết không hợp lệ.'
-            : ''
+    let sourceError = ''
+
+    if (sourceUrl === '') {
+        sourceError = 'Thiếu URL bài viết.'
+    } else if (isValidArticleUrl(sourceUrl) === false) {
+        sourceError = 'URL bài viết không hợp lệ.'
+    }
 
     useEffect(() => {
         if (sourceError !== '') {
@@ -65,7 +89,7 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
 
         fetchArticleDetail(sourceUrl)
             .then((detail) => {
-                if (ignore) {
+                if (ignore === true) {
                     return
                 }
 
@@ -85,11 +109,14 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 }
             })
             .catch((caughtError: unknown) => {
-                if (ignore) {
+                if (ignore === true) {
                     return
                 }
 
-                if (caughtError instanceof Error && caughtError.message !== '') {
+                if (
+                    caughtError instanceof Error &&
+                    caughtError.message !== ''
+                ) {
                     setError(caughtError.message)
                 } else {
                     setError('Không tải được bài viết.')
@@ -149,15 +176,21 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
     }
 
     function focusCommentInput() {
-        document.getElementById('article-comment-content')?.focus()
+        document.getElementById(
+            'article-comment-content'
+        )?.focus()
     }
 
     function handleFontSizeChange(size: number) {
-        if (fontSize === size) return
+        if (fontSize === size) {
+            return
+        }
 
         setFontSize(size)
         setSaveMessageType('success')
-        setSaveMessage(`Đã đổi cỡ chữ: ${fontSizeLabels[size]}`)
+        setSaveMessage(
+            `Đã đổi cỡ chữ: ${fontSizeLabels[size]}`
+        )
     }
 
     function handlePrint() {
@@ -176,23 +209,29 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 {errorMessage !== '' ? (
                     <p role="alert">{errorMessage}</p>
                 ) : (
-                    <p role="status">Đang tải bài viết…</p>
+                    <p role="status">
+                        Đang tải bài viết…
+                    </p>
                 )}
 
                 {error !== '' && sourceError === '' ? (
-                    <button type="button" onClick={handleRetry}>
+                    <button
+                        type="button"
+                        onClick={handleRetry}
+                    >
                         Thử lại
                     </button>
                 ) : null}
 
-                <Link to="/">Quay lại trang chủ</Link>
+                <Link to="/">
+                    Quay lại trang chủ
+                </Link>
             </section>
         )
     }
 
     return (
         <article className="article-page">
-
             {saveMessage !== '' ? (
                 <div
                     className={
@@ -200,13 +239,23 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                             ? 'article-save-toast article-save-toast-success'
                             : 'article-save-toast article-save-toast-error'
                     }
-                    role={saveMessageType === 'error' ? 'alert' : 'status'}
+                    role={
+                        saveMessageType === 'error'
+                            ? 'alert'
+                            : 'status'
+                    }
                 >
                     <div className="article-save-toast-icon">
                         {saveMessageType === 'success' ? (
-                            <CheckCircle2 size={23} aria-hidden="true" />
+                            <CheckCircle2
+                                size={23}
+                                aria-hidden="true"
+                            />
                         ) : (
-                            <CircleAlert size={23} aria-hidden="true" />
+                            <CircleAlert
+                                size={23}
+                                aria-hidden="true"
+                            />
                         )}
                     </div>
 
@@ -226,7 +275,10 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                         onClick={handleCloseNotification}
                         aria-label="Đóng thông báo"
                     >
-                        <X size={19} aria-hidden="true" />
+                        <X
+                            size={19}
+                            aria-hidden="true"
+                        />
                     </button>
                 </div>
             ) : null}
@@ -253,17 +305,30 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                 />
             </header>
 
-              <div
-                  className="article-page__content"
-                  style={{ fontSize }}
-                  dangerouslySetInnerHTML={{ __html: article.contentHtml }}
-              />
+            <ArticleAiAssistant
+                title={article.title}
+                contentHtml={article.contentHtml}
+            />
 
-              <ArticleComments key={sourceUrl} sourceUrl={sourceUrl} />
+            <div
+                className="article-page__content"
+                style={{ fontSize }}
+                dangerouslySetInnerHTML={{
+                    __html: article.contentHtml
+                }}
+            />
 
-              <Link className="article-page__back" to="/">
-                  Quay lại trang chủ
-              </Link>
+            <ArticleComments
+                key={sourceUrl}
+                sourceUrl={sourceUrl}
+            />
+
+            <Link
+                className="article-page__back"
+                to="/"
+            >
+                Quay lại trang chủ
+            </Link>
         </article>
     )
 }
