@@ -1,5 +1,7 @@
-import { defineConfig, type Plugin } from 'vite'
+
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { handleArticleAiRequest } from './server/articleAi'
 
 const laodongRssProxy: Plugin = {
   name: 'laodong-rss-proxy',
@@ -12,64 +14,87 @@ const laodongRssProxy: Plugin = {
       }
 
       try {
-        const sourceUrl = 'https://laodong.vn' + req.url.replace(/^\/api\/laodong/, '')
+        const sourceUrl =
+            'https://laodong.vn' +
+            req.url.replace(/^\/api\/laodong/, '')
+
         const headers: Record<string, string> = {
-          Accept: 'application/rss+xml, application/xml, text/xml',
+          Accept: 'application/rss+xml, application/xml, text/xml'
         }
 
         let response = await fetch(sourceUrl, {
           headers,
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(15000)
         })
 
         let xml = await response.text()
 
         if (!/<rss(?:\s|>)/i.test(xml)) {
-          const cookie = xml.match(/document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i)?.[1]
+          const cookie = xml.match(
+              /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
+          )?.[1]
 
           if (!cookie) {
-            throw new Error('Nguồn không trả về RSS hoặc mẫu cookie D1N đã thay đổi')
+            throw new Error(
+                'Nguồn không trả về RSS hoặc mẫu cookie D1N đã thay đổi'
+            )
           }
 
           headers.Cookie = cookie
 
           response = await fetch(sourceUrl, {
             headers,
-            signal: AbortSignal.timeout(15000),
+            signal: AbortSignal.timeout(15000)
           })
 
           xml = await response.text()
         }
 
         if (!response.ok) {
-          throw new Error(`Nguồn trả về HTTP ${response.status}`)
+          throw new Error(
+              `Nguồn trả về HTTP ${response.status}`
+          )
         }
 
         if (!/<rss(?:\s|>)/i.test(xml)) {
-          throw new Error('Nguồn vẫn chưa trả về RSS sau khi gửi cookie')
+          throw new Error(
+              'Nguồn vẫn chưa trả về RSS sau khi gửi cookie'
+          )
         }
 
         res.statusCode = 200
-        res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+        res.setHeader(
+            'Content-Type',
+            'application/xml; charset=utf-8'
+        )
         res.end(xml)
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Không lấy được RSS'
+        const message = error instanceof Error
+            ? error.message
+            : 'Không lấy được RSS'
 
         console.error('Lỗi RSS Lao Động:', message)
 
         res.statusCode = 502
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+        res.setHeader(
+            'Content-Type',
+            'text/plain; charset=utf-8'
+        )
         res.end(message)
       }
     })
-  },
+  }
 }
+
 const laodongArticleProxy: Plugin = {
   name: 'laodong-article-proxy',
 
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
-      const requestUrl = new URL(req.url ?? '/', 'http://localhost')
+      const requestUrl = new URL(
+          req.url ?? '/',
+          'http://localhost'
+      )
 
       if (requestUrl.pathname !== '/api/laodong/article') {
         next()
@@ -78,7 +103,10 @@ const laodongArticleProxy: Plugin = {
 
       const sendError = (status: number, message: string) => {
         res.statusCode = status
-        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.setHeader(
+            'Content-Type',
+            'application/json; charset=utf-8'
+        )
         res.end(JSON.stringify({ message }))
       }
 
@@ -91,9 +119,14 @@ const laodongArticleProxy: Plugin = {
       let sourceUrl: URL
 
       try {
-        sourceUrl = new URL(requestUrl.searchParams.get('url') ?? '')
+        sourceUrl = new URL(
+            requestUrl.searchParams.get('url') ?? ''
+        )
       } catch {
-        sendError(400, 'Thiếu URL bài viết hoặc URL không hợp lệ')
+        sendError(
+            400,
+            'Thiếu URL bài viết hoặc URL không hợp lệ'
+        )
         return
       }
 
@@ -103,7 +136,10 @@ const laodongArticleProxy: Plugin = {
           sourceUrl.password ||
           !sourceUrl.pathname.endsWith('.ldo')
       ) {
-        sendError(400, 'Chỉ hỗ trợ URL bài viết HTTPS thuộc laodong.vn')
+        sendError(
+            400,
+            'Chỉ hỗ trợ URL bài viết HTTPS thuộc laodong.vn'
+        )
         return
       }
 
@@ -111,17 +147,20 @@ const laodongArticleProxy: Plugin = {
 
       try {
         const headers: Record<string, string> = {
-          Accept: 'text/html',
+          Accept: 'text/html'
         }
 
         let response = await fetch(sourceUrl, {
           headers,
           redirect: 'error',
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(15000)
         })
 
         let html = await response.text()
-        const cookie = html.match(/document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i)?.[1]
+
+        const cookie = html.match(
+            /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
+        )?.[1]
 
         if (cookie) {
           headers.Cookie = cookie
@@ -129,21 +168,28 @@ const laodongArticleProxy: Plugin = {
           response = await fetch(sourceUrl, {
             headers,
             redirect: 'error',
-            signal: AbortSignal.timeout(15000),
+            signal: AbortSignal.timeout(15000)
           })
 
           html = await response.text()
         }
 
         if (!response.ok) {
-          throw new Error(`Nguồn trả về HTTP ${response.status}`)
+          throw new Error(
+              `Nguồn trả về HTTP ${response.status}`
+          )
         }
 
         if (/document\.cookie\s*=\s*["']D1N=/i.test(html)) {
-          throw new Error('Nguồn vẫn yêu cầu xác minh cookie')
+          throw new Error(
+              'Nguồn vẫn yêu cầu xác minh cookie'
+          )
         }
 
-        if (!response.headers.get('content-type')?.includes('text/html')) {
+        if (
+            !response.headers.get('content-type')
+                ?.includes('text/html')
+        ) {
           throw new Error('Nguồn không trả về HTML')
         }
 
@@ -152,27 +198,77 @@ const laodongArticleProxy: Plugin = {
         }
 
         res.statusCode = 200
-        res.setHeader('Content-Type', 'text/html; charset=utf-8')
-        res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'")
+        res.setHeader(
+            'Content-Type',
+            'text/html; charset=utf-8'
+        )
+        res.setHeader(
+            'Content-Security-Policy',
+            "sandbox; default-src 'none'"
+        )
         res.end(html)
       } catch (error) {
         console.error('Lỗi lấy bài Lao Động:', error)
 
-        if (error instanceof Error && error.name === 'TimeoutError') {
-          sendError(504, 'Hết thời gian chờ lấy bài viết')
+        if (
+            error instanceof Error &&
+            error.name === 'TimeoutError'
+        ) {
+          sendError(
+              504,
+              'Hết thời gian chờ lấy bài viết'
+          )
           return
         }
 
-        const message = error instanceof Error ? error.message : 'Không lấy được bài viết'
+        const message = error instanceof Error
+            ? error.message
+            : 'Không lấy được bài viết'
+
         sendError(502, message)
       }
     })
-  },
+  }
 }
 
+const geminiArticleProxy: Plugin = {
+  name: 'gemini-article-proxy',
+
+  configureServer(server) {
+    const environment = loadEnv(
+        server.config.mode,
+        server.config.root,
+        ''
+    )
+
+    server.middlewares.use(async (req, res, next) => {
+      const requestUrl = new URL(
+          req.url ?? '/',
+          'http://localhost'
+      )
+
+      if (requestUrl.pathname !== '/api/ai/article') {
+        next()
+        return
+      }
+
+      await handleArticleAiRequest(
+          req,
+          res,
+          environment.GEMINI_API_KEY,
+          environment.GEMINI_MODEL
+      )
+    })
+  }
+}
 
 export default defineConfig({
-  plugins: [react(),laodongRssProxy,laodongArticleProxy],
+  plugins: [
+    react(),
+    laodongRssProxy,
+    laodongArticleProxy,
+    geminiArticleProxy
+  ],
 
   server: {
     proxy: {
@@ -180,8 +276,10 @@ export default defineConfig({
         target: 'https://laodong.vn',
         changeOrigin: true,
         followRedirects: true,
-        rewrite: (path) => path.replace(/^\/api\/laodong/, ''),
-      },
-    },
-  },
+        rewrite: (path) => {
+          return path.replace(/^\/api\/laodong/, '')
+        }
+      }
+    }
+  }
 })
