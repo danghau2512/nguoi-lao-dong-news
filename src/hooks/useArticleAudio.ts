@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+
+function splitArticleText(text: string): string[] {
+    const content = text.replace(/\s+/g, ' ').trim()
+    const chunks = content.match(/.{1,3000}(?=\s|$)|.{1,3000}/gu) ?? []
+
+    return chunks.map((chunk) => chunk.trim()).filter(Boolean)
+}
 export function useArticleAudio() {
     const [isAudioLoading, setIsAudioLoading] = useState(false)
     const [audioError, setAudioError] = useState('')
@@ -20,15 +27,21 @@ export function useArticleAudio() {
     }, [])
 
     async function playArticle(text: string) {
-        if (requestRef.current) return
+        const chunks = splitArticleText(text)
 
-        const content = text.trim()
-        setAudioError('')
-
-        if (!content || content.length > 3000) {
-            setAudioError('Bản hiện tại hỗ trợ đoạn đọc từ 1 đến 3.000 ký tự.')
+        if (chunks.length === 0) {
+            setAudioError('Bài viết chưa có nội dung để đọc.')
             return
         }
+
+        void playChunk(chunks, 0)
+    }
+
+    async function playChunk(chunks: string[], index: number) {
+        if (requestRef.current) return
+
+        setAudioError('')
+
 
         const controller = new AbortController()
         requestRef.current = controller
@@ -42,7 +55,7 @@ export function useArticleAudio() {
                 const response = await fetch('/api/tts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: content }),
+                    body: JSON.stringify({ text: chunks[index] }),
                     signal: controller.signal,
                 })
 
@@ -54,8 +67,20 @@ export function useArticleAudio() {
                 const mp3 = await response.blob()
                 if (controller.signal.aborted) return
 
-                audio = new Audio(URL.createObjectURL(mp3))
-                audioRef.current = audio
+                const player = new Audio(URL.createObjectURL(mp3))
+                audioRef.current = player
+                audio = player
+
+                player.onended = () => {
+                    if (audioRef.current !== player) return
+
+                    URL.revokeObjectURL(player.src)
+                    audioRef.current = null
+
+                    if (index + 1 < chunks.length) {
+                        void playChunk(chunks, index + 1)
+                    }
+                }
             }
 
             await audio.play()
