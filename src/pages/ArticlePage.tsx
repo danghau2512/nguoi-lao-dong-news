@@ -247,6 +247,7 @@ function ArticleDetailView({ sourceUrl }: { sourceUrl: string }) {
                     onPrint={handlePrint}
                     author={article.author}
                     publishedAt={article.publishedAt}
+                    readingMinutes={article.readingMinutes}
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
