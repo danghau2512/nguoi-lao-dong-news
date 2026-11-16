@@ -80,6 +80,7 @@ export default function Header() {
     }
 
     return (
+        <>
         <header className="news-header">
 
             <div className="news-header-topline">
@@ -255,8 +256,10 @@ export default function Header() {
 
                 </div>
             </div>
+        </header>
 
-            <div className="news-header-navigation">
+
+            <div className="news-header-navigation news-header">
                 <nav
                     className="news-header-container news-header-nav"
                     aria-label="Điều hướng chính"
@@ -333,7 +336,7 @@ export default function Header() {
 
                 </nav>
             </div>
+        </>
 
-        </header>
     )
 }
