@@ -190,6 +190,13 @@
     background-color: var(--theme-bg);
     border-top: 1px solid var(--theme-border);
     border-bottom: 2px solid #c92833;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.app-layout:has(.article-reading-progress) > .news-header-navigation {
+    top: 4px;
 }
 
 .news-header-nav {

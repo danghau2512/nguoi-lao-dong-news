@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, CircleAlert, X } from 'lucide-react'
 
@@ -62,6 +62,8 @@ function ArticleDetailView({
     const [retryCount, setRetryCount] = useState(0)
 
     const [fontSize, setFontSize] = useState<number>()
+    const articleContentRef = useRef<HTMLDivElement>(null)
+    const [readingProgress, setReadingProgress] = useState(0)
 
     const [isSaved, setIsSaved] = useState(() => {
         return isArticleSaved(sourceUrl)
@@ -201,6 +203,38 @@ function ArticleDetailView({
         setSaveMessage('')
     }
 
+    useEffect(() => {
+        const content = articleContentRef.current
+        if (!content) return
+
+        const updateReadingProgress = () => {
+            const { top, bottom, height } = content.getBoundingClientRect()
+            const viewportHeight = window.innerHeight
+            const scrollDistance = height - viewportHeight
+
+            if (scrollDistance <= 0) {
+                setReadingProgress(bottom <= viewportHeight ? 100 : 0)
+                return
+            }
+
+            const percent = (-top / scrollDistance) * 100
+            setReadingProgress(Math.min(100, Math.max(0, percent)))
+        }
+
+        updateReadingProgress()
+        window.addEventListener('scroll', updateReadingProgress, { passive: true })
+        window.addEventListener('resize', updateReadingProgress)
+
+        const observer = new ResizeObserver(updateReadingProgress)
+        observer.observe(content)
+
+        return () => {
+            window.removeEventListener('scroll', updateReadingProgress)
+            window.removeEventListener('resize', updateReadingProgress)
+            observer.disconnect()
+        }
+    }, [article])
+
     const errorMessage = sourceError || error
 
     if (article === null) {
@@ -232,6 +266,15 @@ function ArticleDetailView({
 
     return (
         <article className="article-page">
+
+            <div
+                className="article-reading-progress"
+                role="progressbar"
+                aria-label="Tiến trình đọc bài"
+                aria-valuenow={Math.round(readingProgress)}
+                style={{ width: `${readingProgress}%` }}
+            />
+
             {saveMessage !== '' ? (
                 <div
                     className={
@@ -299,6 +342,7 @@ function ArticleDetailView({
                     onPrint={handlePrint}
                     author={article.author}
                     publishedAt={article.publishedAt}
+                    readingMinutes={article.readingMinutes}
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
@@ -312,6 +356,7 @@ function ArticleDetailView({
 
             <div
                 className="article-page__content"
+              ref={articleContentRef}
                 style={{ fontSize }}
                 dangerouslySetInnerHTML={{
                     __html: article.contentHtml
