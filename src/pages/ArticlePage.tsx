@@ -13,7 +13,8 @@ import {
 import ArticleToolbar from '../components/ArticleToolbar'
 import ArticleComments from '../components/ArticleComments'
 import ArticleAiAssistant from '../components/ArticleAiAssistant'
-
+import { useArticleAudio } from '../hooks/useArticleAudio'
+import { getArticleSpeechText } from '../utils/articleSpeechText'
 import './ArticlePage.css'
 import './ArticleSave.css'
 
@@ -60,7 +61,7 @@ function ArticleDetailView({
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
-
+    const { playArticle, isAudioLoading, audioError } = useArticleAudio()
     const [fontSize, setFontSize] = useState<number>()
 
     const [isSaved, setIsSaved] = useState(() => {
@@ -295,6 +296,7 @@ function ArticleDetailView({
                 ) : null}
 
                 <ArticleToolbar
+
                     onFeedback={focusCommentInput}
                     onPrint={handlePrint}
                     author={article.author}
@@ -302,7 +304,12 @@ function ArticleDetailView({
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
+                    onListen={isAudioLoading ? undefined : () =>
+                        void playArticle(getArticleSpeechText(article.title, article.contentHtml))
+                    }
                 />
+                {isAudioLoading && <p role="status">Đang tạo âm thanh…</p>}
+                {audioError && <p role="alert">{audioError}</p>}
             </header>
 
             <ArticleAiAssistant
