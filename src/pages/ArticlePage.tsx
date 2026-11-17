@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CheckCircle2, CircleAlert, X } from 'lucide-react'
+import {CheckCircle2, CircleAlert, LoaderCircle, X} from 'lucide-react'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
@@ -60,7 +60,7 @@ function ArticleDetailView({ sourceUrl }: {
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
     const [fontSize, setFontSize] = useState<number>()
-    const { status, audioError, playArticle, pauseArticle, resumeArticle, stopArticle } = useArticleAudio()
+    const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio()
 
     const [isSaved, setIsSaved] = useState(() => {
         return isArticleSaved(sourceUrl)
@@ -235,62 +235,50 @@ function ArticleDetailView({ sourceUrl }: {
             onClick: () => playArticle(getArticleSpeechText(article.title, article.contentHtml)),
         },
         loading: { label: 'Đọc bài', onClick: undefined },
+        ready: { label: 'Đọc bài', onClick: resumeArticle },
         playing: { label: 'Tạm dừng', onClick: pauseArticle },
         paused: { label: 'Tiếp tục', onClick: resumeArticle },
-    }[status]
 
+    }[status]
+    const isGeneratingAudio = status === 'loading'
+    const toastType = isGeneratingAudio ? 'loading' : saveMessageType
+    const toastMessage = isGeneratingAudio ? 'Đang tạo âm thanh…' : saveMessage
+
+    const ToastIcon = {
+        loading: LoaderCircle,
+        success: CheckCircle2,
+        error: CircleAlert,
+    }[toastType]
     return (
         <article className="article-page">
-            {saveMessage !== '' ? (
+            {toastMessage && (
                 <div
-                    className={
-                        saveMessageType === 'success'
-                            ? 'article-save-toast article-save-toast-success'
-                            : 'article-save-toast article-save-toast-error'
-                    }
-                    role={
-                        saveMessageType === 'error'
-                            ? 'alert'
-                            : 'status'
-                    }
+                    className={`article-save-toast article-save-toast-${toastType}`}
+                    role={toastType === 'error' ? 'alert' : 'status'}
                 >
                     <div className="article-save-toast-icon">
-                        {saveMessageType === 'success' ? (
-                            <CheckCircle2
-                                size={23}
-                                aria-hidden="true"
-                            />
-                        ) : (
-                            <CircleAlert
-                                size={23}
-                                aria-hidden="true"
-                            />
-                        )}
+                        <ToastIcon size={23} aria-hidden="true" />
                     </div>
 
                     <div className="article-save-toast-content">
                         <strong>
-                            {saveMessageType === 'success'
-                                ? 'Thông báo'
-                                : 'Có lỗi xảy ra'}
+                            {toastType === 'error' ? 'Có lỗi xảy ra' : 'Thông báo'}
                         </strong>
-
-                        <p>{saveMessage}</p>
+                        <p>{toastMessage}</p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="article-save-toast-close"
-                        onClick={handleCloseNotification}
-                        aria-label="Đóng thông báo"
-                    >
-                        <X
-                            size={19}
-                            aria-hidden="true"
-                        />
-                    </button>
+                    {!isGeneratingAudio && (
+                        <button
+                            type="button"
+                            className="article-save-toast-close"
+                            onClick={handleCloseNotification}
+                            aria-label="Đóng thông báo"
+                        >
+                            <X size={19} aria-hidden="true" />
+                        </button>
+                    )}
                 </div>
-            ) : null}
+            )}
 
             <header className="article-page__header">
                 <h1 className="article-page__title">
@@ -313,9 +301,7 @@ function ArticleDetailView({ sourceUrl }: {
                     onFontSizeChange={handleFontSizeChange}
                     onListen={listenControl.onClick}
                     listenLabel={listenControl.label}
-                    onStopListening={status !== 'idle' ? stopArticle : undefined}
                 />
-                {status === 'loading' && <p role="status">Đang tạo âm thanh…</p>}
                 {audioError && <p role="alert">{audioError}</p>}
             </header>
 

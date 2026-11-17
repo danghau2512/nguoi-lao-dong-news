@@ -103,7 +103,23 @@
     background-color: #fff2f3;
     color: #c92833;
 }
+.article-save-toast-loading {
+    border-left: 4px solid #2563eb;
+}
 
+.article-save-toast-loading .article-save-toast-icon {
+    color: #2563eb;
+}
+.article-save-toast-loading .article-save-toast-icon svg {
+    animation: article-toast-spin 0.9s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes article-toast-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 @keyframes article-toast-show {
     from {
         opacity: 0;

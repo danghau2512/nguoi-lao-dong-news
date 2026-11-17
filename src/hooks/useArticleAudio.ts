@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-type AudioStatus = 'idle' | 'loading' | 'playing' | 'paused'
+type AudioStatus = 'idle' | 'loading' | 'ready' | 'playing' | 'paused'
 
 function splitArticleText(text: string): string[] {
     const content = text.replace(/\s+/g, ' ').trim()
@@ -69,8 +69,8 @@ export function useArticleAudio() {
 
     function resumeArticle() {
         const audio = audioRef.current
-        if (status !== 'paused' || !audio?.paused || audio.ended) return
-
+        const canResume = status === 'paused' || status === 'ready'
+        if (!canResume || !audio?.paused || audio.ended) return
         void playAudio(audio)
     }
 
@@ -87,7 +87,7 @@ export function useArticleAudio() {
         if (audioRef.current !== audio) return
 
         if (error instanceof DOMException && error.name === 'NotAllowedError') {
-            setStatus('paused')
+            setStatus('ready')
             setAudioError('Âm thanh đã sẵn sàng. Bạn hãy bấm Tiếp tục.')
             return
         }
