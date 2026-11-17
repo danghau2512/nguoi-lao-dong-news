@@ -53,16 +53,14 @@ function isValidArticleUrl(sourceUrl: string): boolean {
     }
 }
 
-function ArticleDetailView({
-                               sourceUrl
-                           }: {
+function ArticleDetailView({ sourceUrl }: {
     sourceUrl: string
 }) {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
-    const { playArticle, isAudioLoading, audioError } = useArticleAudio()
     const [fontSize, setFontSize] = useState<number>()
+    const { status, audioError, playArticle, pauseArticle, resumeArticle, stopArticle } = useArticleAudio()
 
     const [isSaved, setIsSaved] = useState(() => {
         return isArticleSaved(sourceUrl)
@@ -231,6 +229,16 @@ function ArticleDetailView({
         )
     }
 
+    const listenControl = {
+        idle: {
+            label: 'Đọc bài',
+            onClick: () => playArticle(getArticleSpeechText(article.title, article.contentHtml)),
+        },
+        loading: { label: 'Đọc bài', onClick: undefined },
+        playing: { label: 'Tạm dừng', onClick: pauseArticle },
+        paused: { label: 'Tiếp tục', onClick: resumeArticle },
+    }[status]
+
     return (
         <article className="article-page">
             {saveMessage !== '' ? (
@@ -296,7 +304,6 @@ function ArticleDetailView({
                 ) : null}
 
                 <ArticleToolbar
-
                     onFeedback={focusCommentInput}
                     onPrint={handlePrint}
                     author={article.author}
@@ -304,11 +311,11 @@ function ArticleDetailView({
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
-                    onListen={isAudioLoading ? undefined : () =>
-                        void playArticle(getArticleSpeechText(article.title, article.contentHtml))
-                    }
+                    onListen={listenControl.onClick}
+                    listenLabel={listenControl.label}
+                    onStopListening={status !== 'idle' ? stopArticle : undefined}
                 />
-                {isAudioLoading && <p role="status">Đang tạo âm thanh…</p>}
+                {status === 'loading' && <p role="status">Đang tạo âm thanh…</p>}
                 {audioError && <p role="alert">{audioError}</p>}
             </header>
 
