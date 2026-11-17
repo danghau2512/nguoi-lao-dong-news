@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
     Bookmark, CalendarDays, Clock, MessageCircle,
     Printer, Settings, User, Volume2,
@@ -11,10 +12,13 @@ type ArticleToolbarProps = {
     isSaved?: boolean
     onListen?: () => void
     onAudioSettings?: () => void
+    audioSettings?: ReactNode
     onToggleSave?: () => void
     onFeedback?: () => void
     onPrint?: () => void
     onFontSizeChange?: (size: number) => void
+    listenLabel?: string
+    onStopListening?: () => void
 }
 
 const fontSizes = [
@@ -24,8 +28,10 @@ const fontSizes = [
     { label: 'A++', size: 22 },
 ]
 
-export default function ArticleToolbar({author, publishedAt, readingMinutes, isSaved = false, onListen, onAudioSettings,
-                                           onToggleSave, onFeedback, onPrint, onFontSizeChange,}: ArticleToolbarProps) {
+export default function ArticleToolbar({
+    author, publishedAt, readingMinutes, isSaved = false, onListen, onAudioSettings, audioSettings,
+    onToggleSave, onFeedback, onPrint, onFontSizeChange, listenLabel = 'Đọc bài', onStopListening,
+}: ArticleToolbarProps) {
     const publishedLabel = publishedAt
         ? new Date(publishedAt).toLocaleString('vi-VN', {
             timeZone: 'Asia/Ho_Chi_Minh',
@@ -49,16 +55,31 @@ export default function ArticleToolbar({author, publishedAt, readingMinutes, isS
 
             <div className="article-toolbar__actions" role="group" aria-label="Công cụ bài viết">
                 <button type="button" onClick={onListen} disabled={!onListen}>
-                    <Volume2 size={18} aria-hidden="true" /> Đọc bài
+                    <Volume2 size={18} aria-hidden="true" /> {listenLabel}
                 </button>
-                <button
-                    type="button"
-                    aria-label="Cài đặt giọng đọc"
-                    onClick={onAudioSettings}
-                    disabled={!onAudioSettings}
-                >
-                    <Settings size={18} aria-hidden="true" />
-                </button>
+
+                {onStopListening && (
+                    <button type="button" onClick={onStopListening}>
+                        Dừng đọc
+                    </button>
+                )}
+                <div className="article-toolbar__audio-settings">
+                    <button
+                        type="button"
+                        aria-label="Cài đặt đọc bài"
+                        aria-expanded={Boolean(audioSettings)}
+                        onClick={onAudioSettings}
+                        disabled={!onAudioSettings}
+                    >
+                        <Settings size={18} aria-hidden="true" />
+                    </button>
+
+                    {audioSettings && (
+                        <section className="article-toolbar__audio-panel" aria-label="Cài đặt đọc bài">
+                            {audioSettings}
+                        </section>
+                    )}
+                </div>
                 <button
                     type="button"
                     onClick={onToggleSave}
