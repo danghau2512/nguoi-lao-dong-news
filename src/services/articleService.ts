@@ -137,6 +137,19 @@ export function extractArticleContent(html: string, sourceUrl: string): string {
 
 }
 
+function estimateReadingMinutes(contentHtml: string): number {
+    const doc = new DOMParser().parseFromString(contentHtml, 'text/html')
+
+    doc.body
+        .querySelectorAll('p, div, br, h2, h3, h4, h5, h6, li, blockquote, figcaption')
+        .forEach((element) => element.after(doc.createTextNode(' ')))
+
+    const text = (doc.body.textContent ?? '').trim()
+    const words = text.split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word))
+
+    return Math.max(1, Math.ceil(words.length / 225))
+}
+
 export async function fetchArticleDetail(sourceUrl: string) {
     const html = await fetchArticleHtml(sourceUrl)
     const summary = extractArticleSummary(html)
@@ -145,5 +158,6 @@ export async function fetchArticleDetail(sourceUrl: string) {
     return {
         ...summary,
         contentHtml,
+        readingMinutes: estimateReadingMinutes(contentHtml),
     }
 }

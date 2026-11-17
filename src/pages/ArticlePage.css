@@ -103,6 +103,16 @@
 .article-page__content figcaption {
     color: var(--theme-muted);
 }
+
+.article-reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    height: 4px;
+    background-color: #e60023;
+    pointer-events: none;
+}
 @media print {
     body:has(.article-page__content),
     body:has(.article-page__content) .article-page {
@@ -121,7 +131,8 @@
     .article-page .article-toolbar__actions,
     .article-page .article-comments,
     .article-page .article-save-toast,
-    .article-page .article-page__back {
+    .article-page .article-page__back,
+    .article-reading-progress{
         display: none;
     }
 
