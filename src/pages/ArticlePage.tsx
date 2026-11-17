@@ -1,7 +1,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import {CheckCircle2, CircleAlert, LoaderCircle, X} from 'lucide-react'
+import { CheckCircle2, CircleAlert, LoaderCircle, X } from 'lucide-react'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
@@ -13,11 +13,18 @@ import {
 import ArticleToolbar from '../components/ArticleToolbar'
 import ArticleComments from '../components/ArticleComments'
 import ArticleAiAssistant from '../components/ArticleAiAssistant'
-import { ARTICLE_AUDIO_VOICES, DEFAULT_ARTICLE_AUDIO_VOICE } from '../constants/articleAudioVoices'
+import ArticleLoading from '../components/ArticleLoading'
+
+import {
+    ARTICLE_AUDIO_VOICES,
+    DEFAULT_ARTICLE_AUDIO_VOICE
+} from '../constants/articleAudioVoices'
 import { useArticleAudio } from '../hooks/useArticleAudio'
 import { getArticleSpeechText } from '../utils/articleSpeechText'
+
 import './ArticlePage.css'
 import './ArticleSave.css'
+
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
@@ -32,6 +39,10 @@ export default function ArticlePage() {
     const [searchParams] = useSearchParams()
 
     const sourceUrl = searchParams.get('url')?.trim() ?? ''
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [sourceUrl])
 
     return (
         <ArticleDetailView
@@ -208,32 +219,59 @@ function ArticleDetailView({ sourceUrl }: {
 
     useEffect(() => {
         const content = articleContentRef.current
-        if (!content) return
+
+        if (!content) {
+            return
+        }
 
         const updateReadingProgress = () => {
-            const { top, bottom, height } = content.getBoundingClientRect()
+            const { top, bottom, height } =
+                content.getBoundingClientRect()
+
             const viewportHeight = window.innerHeight
             const scrollDistance = height - viewportHeight
 
             if (scrollDistance <= 0) {
-                setReadingProgress(bottom <= viewportHeight ? 100 : 0)
+                setReadingProgress(
+                    bottom <= viewportHeight ? 100 : 0
+                )
                 return
             }
 
             const percent = (-top / scrollDistance) * 100
-            setReadingProgress(Math.min(100, Math.max(0, percent)))
+
+            setReadingProgress(
+                Math.min(100, Math.max(0, percent))
+            )
         }
 
         updateReadingProgress()
-        window.addEventListener('scroll', updateReadingProgress, { passive: true })
-        window.addEventListener('resize', updateReadingProgress)
+
+        window.addEventListener(
+            'scroll',
+            updateReadingProgress,
+            { passive: true }
+        )
+
+        window.addEventListener(
+            'resize',
+            updateReadingProgress
+        )
 
         const observer = new ResizeObserver(updateReadingProgress)
         observer.observe(content)
 
         return () => {
-            window.removeEventListener('scroll', updateReadingProgress)
-            window.removeEventListener('resize', updateReadingProgress)
+            window.removeEventListener(
+                'scroll',
+                updateReadingProgress
+            )
+
+            window.removeEventListener(
+                'resize',
+                updateReadingProgress
+            )
+
             observer.disconnect()
         }
     }, [article])
@@ -241,15 +279,13 @@ function ArticleDetailView({ sourceUrl }: {
     const errorMessage = sourceError || error
 
     if (article === null) {
+        if (errorMessage === '') {
+            return <ArticleLoading />
+        }
+
         return (
             <section className="article-page">
-                {errorMessage !== '' ? (
-                    <p role="alert">{errorMessage}</p>
-                ) : (
-                    <p role="status">
-                        Đang tải bài viết…
-                    </p>
-                )}
+                <p role="alert">{errorMessage}</p>
 
                 {error !== '' && sourceError === '' ? (
                     <button
@@ -394,7 +430,7 @@ function ArticleDetailView({ sourceUrl }: {
 
             <div
                 className="article-page__content"
-              ref={articleContentRef}
+                ref={articleContentRef}
                 style={{ fontSize }}
                 dangerouslySetInnerHTML={{
                     __html: article.contentHtml

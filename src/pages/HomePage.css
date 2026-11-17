@@ -283,3 +283,57 @@
         font-size: 14px;
     }
 }
+
+.home-page-more {
+    margin-top: 50px;
+}
+
+.home-page-more-count {
+    margin: 0 0 15px;
+    font-size: 13px;
+    color: var(--theme-muted);
+}
+
+.home-page-more-list {
+    max-width: 900px;
+}
+
+.home-page-more-list .news-card {
+    padding: 20px 0;
+}
+
+.home-page-more-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.home-page-more-button {
+    padding: 12px 28px;
+    border: 1px solid var(--theme-accent);
+    border-radius: 5px;
+    background-color: var(--theme-accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.home-page-more-button:hover {
+    opacity: 0.9;
+}
+
+.home-page-more-button:focus-visible {
+    outline: 2px solid var(--theme-accent);
+    outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+    .home-page-more {
+        margin-top: 35px;
+    }
+
+    .home-page-more-button {
+        width: 100%;
+    }
+}
