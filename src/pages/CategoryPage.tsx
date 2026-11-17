@@ -1,23 +1,29 @@
 
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { categories } from '../constants/categories'
 import { rssFeeds } from '../constants/rssFeeds'
 import { useCategoryNews } from '../hooks/useCategoryNews'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
+import Pagination from '../components/Pagination'
 import './CategoryPage.css'
+
+const PAGE_SIZE = 10
 
 type CategoryNewsListProps = {
     categorySlug: string
 }
 
 function CategoryNewsList(props: CategoryNewsListProps) {
-    const { articles, status, error, retry } = useCategoryNews(props.categorySlug)
+    const { articles, status, error, retry } =
+        useCategoryNews(props.categorySlug)
+
+    const [currentPage, setCurrentPage] = useState(1)
 
     if (status === 'idle' || status === 'loading') {
         return <NewsStatus type="loading" />
     }
-
 
     if (status === 'failed') {
         let errorMessage = 'Không thể tải tin tức.'
@@ -28,7 +34,6 @@ function CategoryNewsList(props: CategoryNewsListProps) {
 
         return (
             <div className="category-page-error">
-
                 <NewsStatus
                     type="error"
                     message={errorMessage}
@@ -48,7 +53,6 @@ function CategoryNewsList(props: CategoryNewsListProps) {
                         Thử lại
                     </button>
                 </div>
-
             </div>
         )
     }
@@ -63,14 +67,38 @@ function CategoryNewsList(props: CategoryNewsListProps) {
         )
     }
 
+    const totalPages = Math.ceil(articles.length / PAGE_SIZE)
+    const validPage = Math.min(currentPage, totalPages)
+
+    const startIndex = (validPage - 1) * PAGE_SIZE
+    const endIndex = startIndex + PAGE_SIZE
+
+    const currentArticles = articles.slice(
+        startIndex,
+        endIndex
+    )
+
+    function handlePageChange(page: number) {
+        setCurrentPage(page)
+
+        document.querySelector(
+            '.category-page-heading'
+        )?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        })
+    }
+
     return (
         <>
             <p className="category-page-count">
-                Có {articles.length} bài viết
+                Có {articles.length} bài viết.
+                Đang hiển thị {startIndex + 1}–
+                {Math.min(endIndex, articles.length)}
             </p>
 
             <div className="category-page-news-list">
-                {articles.map((news) => (
+                {currentArticles.map((news) => (
                     <NewsCard
                         key={news.id}
                         id={news.id}
@@ -82,6 +110,12 @@ function CategoryNewsList(props: CategoryNewsListProps) {
                     />
                 ))}
             </div>
+
+            <Pagination
+                currentPage={validPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </>
     )
 }
@@ -97,9 +131,7 @@ export default function CategoryPage() {
         return (
             <div className="category-page">
                 <h1>Không tìm thấy chuyên mục</h1>
-
                 <p>Chuyên mục bạn yêu cầu không tồn tại.</p>
-
                 <Link to="/">Quay lại trang chủ</Link>
             </div>
         )
@@ -111,7 +143,6 @@ export default function CategoryPage() {
 
     return (
         <div className="category-page">
-
             <div className="category-page-breadcrumb">
                 <Link to="/">Trang chủ</Link>
 
@@ -134,6 +165,7 @@ export default function CategoryPage() {
             <div className="category-page-content">
                 {rssFeed !== undefined ? (
                     <CategoryNewsList
+                        key={category.slug}
                         categorySlug={category.slug}
                     />
                 ) : (
@@ -156,7 +188,6 @@ export default function CategoryPage() {
                     </div>
                 )}
             </div>
-
         </div>
     )
 }
