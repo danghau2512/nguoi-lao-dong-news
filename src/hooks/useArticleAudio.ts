@@ -32,12 +32,20 @@ function releaseAudio(audio: HTMLAudioElement | null) {
     URL.revokeObjectURL(audio.src)
 }
 
-export function useArticleAudio() {
+export function useArticleAudio(playbackRate = 1) {
     const [status, setStatus] = useState<AudioStatus>('idle')
     const [audioError, setAudioError] = useState('')
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const requestRef = useRef<AbortController | null>(null)
+    const playbackRateRef = useRef(playbackRate)
 
+    useEffect(() => {
+        playbackRateRef.current = playbackRate
+
+        if (audioRef.current) {
+            audioRef.current.playbackRate = playbackRate
+        }
+    }, [playbackRate])
     useEffect(() => {
         return () => {
             requestRef.current?.abort()
@@ -134,6 +142,7 @@ export function useArticleAudio() {
             if (controller.signal.aborted) return
 
             audio = new Audio(URL.createObjectURL(mp3))
+            audio.playbackRate = playbackRateRef.current
             audioRef.current = audio
         } catch (error) {
             if (controller.signal.aborted) return

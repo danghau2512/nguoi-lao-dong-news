@@ -60,8 +60,10 @@ function ArticleDetailView({ sourceUrl }: {
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
     const [fontSize, setFontSize] = useState<number>()
-    const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio()
+    const [playbackRate, setPlaybackRate] = useState(1)
+    const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false)
 
+    const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio(playbackRate)
     const [isSaved, setIsSaved] = useState(() => {
         return isArticleSaved(sourceUrl)
     })
@@ -300,8 +302,23 @@ function ArticleDetailView({ sourceUrl }: {
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
                     onListen={listenControl.onClick}
+                    onAudioSettings={() => setIsAudioSettingsOpen((open) => !open)}
                     listenLabel={listenControl.label}
                 />
+                {isAudioSettingsOpen && (
+                    <label>
+                        Tốc độ đọc{' '}
+                        <select
+                            value={playbackRate}
+                            onChange={(event) => setPlaybackRate(Number(event.target.value))}
+                        >
+                            <option value={0.75}>0,75×</option>
+                            <option value={1}>1×</option>
+                            <option value={1.25}>1,25×</option>
+                            <option value={1.5}>1,5×</option>
+                        </select>
+                    </label>
+                )}
                 {audioError && <p role="alert">{audioError}</p>}
             </header>
 
