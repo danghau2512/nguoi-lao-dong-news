@@ -13,6 +13,7 @@ import {
 import ArticleToolbar from '../components/ArticleToolbar'
 import ArticleComments from '../components/ArticleComments'
 import ArticleAiAssistant from '../components/ArticleAiAssistant'
+import { ARTICLE_AUDIO_VOICES, DEFAULT_ARTICLE_AUDIO_VOICE } from '../constants/articleAudioVoices'
 import { useArticleAudio } from '../hooks/useArticleAudio'
 import { getArticleSpeechText } from '../utils/articleSpeechText'
 import './ArticlePage.css'
@@ -61,6 +62,7 @@ function ArticleDetailView({ sourceUrl }: {
     const [retryCount, setRetryCount] = useState(0)
     const [fontSize, setFontSize] = useState<number>()
     const [playbackRate, setPlaybackRate] = useState(1)
+    const [voice, setVoice] = useState(DEFAULT_ARTICLE_AUDIO_VOICE)
     const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false)
 
     const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio(playbackRate)
@@ -234,7 +236,10 @@ function ArticleDetailView({ sourceUrl }: {
     const listenControl = {
         idle: {
             label: 'Đọc bài',
-            onClick: () => playArticle(getArticleSpeechText(article.title, article.contentHtml)),
+            onClick: () => {
+                const text = getArticleSpeechText(article.title, article.contentHtml)
+                playArticle(text, voice)
+            },
         },
         loading: { label: 'Đọc bài', onClick: undefined },
         ready: { label: 'Đọc bài', onClick: resumeArticle },
@@ -303,22 +308,39 @@ function ArticleDetailView({ sourceUrl }: {
                     onFontSizeChange={handleFontSizeChange}
                     onListen={listenControl.onClick}
                     onAudioSettings={() => setIsAudioSettingsOpen((open) => !open)}
+                    audioSettings={isAudioSettingsOpen && (
+                        <>
+                            <strong>Cài đặt đọc bài</strong>
+
+                            <label>
+                                Giọng đọc
+                                <select value={voice} onChange={(event) => setVoice(event.target.value)}>
+                                    {ARTICLE_AUDIO_VOICES.map(({ id, label }) => (
+                                        <option key={id} value={id}>{label}</option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Tốc độ đọc
+                                <select
+                                    value={playbackRate}
+                                    onChange={(event) => setPlaybackRate(Number(event.target.value))}
+                                >
+                                    <option value={0.75}>0,75×</option>
+                                    <option value={1}>1×</option>
+                                    <option value={1.25}>1,25×</option>
+                                    <option value={1.5}>1,5×</option>
+                                </select>
+                            </label>
+
+                            {status !== 'idle' && (
+                                <small>Giọng đã chọn áp dụng từ lượt đọc tiếp theo.</small>
+                            )}
+                        </>
+                    )}
                     listenLabel={listenControl.label}
                 />
-                {isAudioSettingsOpen && (
-                    <label>
-                        Tốc độ đọc{' '}
-                        <select
-                            value={playbackRate}
-                            onChange={(event) => setPlaybackRate(Number(event.target.value))}
-                        >
-                            <option value={0.75}>0,75×</option>
-                            <option value={1}>1×</option>
-                            <option value={1.25}>1,25×</option>
-                            <option value={1.5}>1,5×</option>
-                        </select>
-                    </label>
-                )}
                 {audioError && <p role="alert">{audioError}</p>}
             </header>
 

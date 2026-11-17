@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import {DEFAULT_ARTICLE_AUDIO_VOICE} from "../constants/articleAudioVoices.ts";
 
 type AudioStatus = 'idle' | 'loading' | 'ready' | 'playing' | 'paused'
 
@@ -55,7 +56,7 @@ export function useArticleAudio(playbackRate = 1) {
         }
     }, [])
 
-    function playArticle(text: string) {
+    function playArticle(text: string,voice = DEFAULT_ARTICLE_AUDIO_VOICE) {
         if (requestRef.current || audioRef.current) return
 
         const chunks = splitArticleText(text)
@@ -64,7 +65,7 @@ export function useArticleAudio(playbackRate = 1) {
             return
         }
 
-        void playChunk(chunks, 0)
+        void playChunk(chunks, 0, voice)
     }
 
     function pauseArticle() {
@@ -117,7 +118,7 @@ export function useArticleAudio(playbackRate = 1) {
         }
     }
 
-    async function playChunk(chunks: string[], index: number) {
+    async function playChunk(chunks: string[], index: number, voice: string) {
         const controller = new AbortController()
         requestRef.current = controller
         setStatus('loading')
@@ -129,7 +130,7 @@ export function useArticleAudio(playbackRate = 1) {
             const response = await fetch('/api/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: chunks[index] }),
+                body: JSON.stringify({ text: chunks[index],voice }),
                 signal: controller.signal,
             })
 
@@ -161,7 +162,7 @@ export function useArticleAudio(playbackRate = 1) {
             audioRef.current = null
 
             if (index + 1 < chunks.length) {
-                void playChunk(chunks, index + 1)
+                void playChunk(chunks, index + 1,voice)
             } else {
                 setStatus('idle')
             }

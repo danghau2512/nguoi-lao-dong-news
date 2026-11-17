@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
     Bookmark, CalendarDays, Clock, MessageCircle,
     Printer, Settings, User, Volume2,
@@ -11,6 +12,7 @@ type ArticleToolbarProps = {
     isSaved?: boolean
     onListen?: () => void
     onAudioSettings?: () => void
+    audioSettings?: ReactNode
     onToggleSave?: () => void
     onFeedback?: () => void
     onPrint?: () => void
@@ -27,7 +29,7 @@ const fontSizes = [
 ]
 
 export default function ArticleToolbar({
-    author, publishedAt, readingMinutes, isSaved = false, onListen, onAudioSettings,
+    author, publishedAt, readingMinutes, isSaved = false, onListen, onAudioSettings, audioSettings,
     onToggleSave, onFeedback, onPrint, onFontSizeChange, listenLabel = 'Đọc bài', onStopListening,
 }: ArticleToolbarProps) {
     const publishedLabel = publishedAt
@@ -61,14 +63,23 @@ export default function ArticleToolbar({
                         Dừng đọc
                     </button>
                 )}
-                <button
-                    type="button"
-                    aria-label="Cài đặt giọng đọc"
-                    onClick={onAudioSettings}
-                    disabled={!onAudioSettings}
-                >
-                    <Settings size={18} aria-hidden="true" />
-                </button>
+                <div className="article-toolbar__audio-settings">
+                    <button
+                        type="button"
+                        aria-label="Cài đặt đọc bài"
+                        aria-expanded={Boolean(audioSettings)}
+                        onClick={onAudioSettings}
+                        disabled={!onAudioSettings}
+                    >
+                        <Settings size={18} aria-hidden="true" />
+                    </button>
+
+                    {audioSettings && (
+                        <section className="article-toolbar__audio-panel" aria-label="Cài đặt đọc bài">
+                            {audioSettings}
+                        </section>
+                    )}
+                </div>
                 <button
                     type="button"
                     onClick={onToggleSave}

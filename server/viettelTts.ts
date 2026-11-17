@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { ARTICLE_AUDIO_VOICES, DEFAULT_ARTICLE_AUDIO_VOICE } from '../src/constants/articleAudioVoices.ts'
 
-const voices = ['hn-quynhanh', 'hue-maingoc', 'hcm-diemmy']
 const speeds = [0.8, 1, 1.2]
 
 function sendError(res: ServerResponse, status: number, message: string) {
@@ -43,13 +43,14 @@ export async function handleViettelTtsRequest(
         return sendError(res, 400, 'Dữ liệu gửi lên phải là JSON.')
     }
 
-    const { text, voice = 'hn-quynhanh', speed = 1 } = input
+    const { text, speed = 1 } = input
+    const voice = input.voice ?? DEFAULT_ARTICLE_AUDIO_VOICE
 
     if (typeof text !== 'string' || !text.trim() || text.trim().length > 3000) {
         return sendError(res, 400, 'Đoạn cần đọc phải có từ 1 đến 3.000 ký tự.')
     }
 
-    if (typeof voice !== 'string' || !voices.includes(voice)) {
+    if (!ARTICLE_AUDIO_VOICES.some(({ id }) => id === voice)) {
         return sendError(res, 400, 'Giọng đọc không hợp lệ.')
     }
 
