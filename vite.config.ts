@@ -1,7 +1,7 @@
 
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { handleArticleAiRequest } from './server/articleAi'
+import { handleArticleAiRequest } from './server/articleAi.ts'
 
 const laodongRssProxy: Plugin = {
   name: 'laodong-rss-proxy',
