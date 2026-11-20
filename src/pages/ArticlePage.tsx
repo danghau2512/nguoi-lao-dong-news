@@ -7,7 +7,9 @@ import { fetchArticleDetail } from '../services/articleService'
 import {
     isArticleSaved,
     recordArticleView,
-    toggleSavedArticle
+    toggleSavedArticle,
+    getReadingProgress,
+    saveReadingProgress
 } from '../services/personalStorage'
 
 import ArticleToolbar from '../components/ArticleToolbar'
@@ -205,35 +207,55 @@ function ArticleDetailView({
 
     useEffect(() => {
         const content = articleContentRef.current
-        if (!content) return
+
+        if (!content) {
+            return
+        }
+
+        let lastSavedPercent = getReadingProgress(sourceUrl)
 
         const updateReadingProgress = () => {
             const { top, bottom, height } = content.getBoundingClientRect()
             const viewportHeight = window.innerHeight
             const scrollDistance = height - viewportHeight
 
-            if (scrollDistance <= 0) {
-                setReadingProgress(bottom <= viewportHeight ? 100 : 0)
+            const percent = scrollDistance <= 0
+                ? (bottom <= viewportHeight ? 100 : 0)
+                : Math.min(100, Math.max(0, (-top / scrollDistance) * 100))
+
+            setReadingProgress(percent)
+            return percent
+        }
+
+        let lastScrollPercent = Math.floor(updateReadingProgress())
+
+        const handleScroll = () => {
+            const percent = Math.floor(updateReadingProgress())
+
+            if (percent === lastScrollPercent) {
                 return
             }
 
-            const percent = (-top / scrollDistance) * 100
-            setReadingProgress(Math.min(100, Math.max(0, percent)))
+            lastScrollPercent = percent
+
+            if (percent > 0 && percent !== lastSavedPercent) {
+                saveReadingProgress(sourceUrl, percent)
+                lastSavedPercent = percent
+            }
         }
 
-        updateReadingProgress()
-        window.addEventListener('scroll', updateReadingProgress, { passive: true })
+        window.addEventListener('scroll', handleScroll, { passive: true })
         window.addEventListener('resize', updateReadingProgress)
 
         const observer = new ResizeObserver(updateReadingProgress)
         observer.observe(content)
 
         return () => {
-            window.removeEventListener('scroll', updateReadingProgress)
+            window.removeEventListener('scroll', handleScroll)
             window.removeEventListener('resize', updateReadingProgress)
             observer.disconnect()
         }
-    }, [article])
+    }, [article, sourceUrl])
 
     const errorMessage = sourceError || error
 

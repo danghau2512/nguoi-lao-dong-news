@@ -133,6 +133,36 @@ export function getReadingHistory(): PersonalArticle[] {
     return readArticles(HISTORY_KEY)
 }
 
+const READING_PROGRESS_PREFIX = 'goc-tin-reading-progress:'
+
+export function saveReadingProgress(sourceUrl: string, percent: number): void {
+    try {
+        window.localStorage.setItem(
+            READING_PROGRESS_PREFIX + sourceUrl,
+            String(percent)
+        )
+    } catch {
+    }
+}
+
+export function getReadingProgress(sourceUrl: string): number | null {
+    try {
+        const value = window.localStorage.getItem(
+            READING_PROGRESS_PREFIX + sourceUrl
+        )
+        if (value === null) {
+            return null
+        }
+        const percent = Number(value)
+
+        if (!Number.isInteger(percent) || percent < 1 || percent > 100) {
+            return null}
+        return percent
+    } catch {
+        return null
+    }
+}
+
 export function recordArticleView(article: ArticleInformation): void {
     const previousHistory = getReadingHistory()
 
