@@ -163,6 +163,46 @@ export function getReadingProgress(sourceUrl: string): number | null {
     }
 }
 
+const READING_MARK_PREFIX = 'goc-tin-reading-mark:'
+
+export type ReadingMark = {
+    paragraphIndex: number
+    paragraphText: string
+}
+
+export function saveReadingMark(sourceUrl: string, mark: ReadingMark): void {
+    localStorage.setItem(
+        READING_MARK_PREFIX + sourceUrl,
+        JSON.stringify(mark)
+    )
+}
+
+export function getReadingMark(sourceUrl: string): ReadingMark | null {
+    try {
+        const raw = localStorage.getItem(READING_MARK_PREFIX + sourceUrl)
+        if (raw === null) return null
+
+        const mark = JSON.parse(raw) as Partial<ReadingMark> | null
+
+        if (
+            typeof mark?.paragraphIndex !== 'number' ||
+            !Number.isInteger(mark.paragraphIndex) ||
+            mark.paragraphIndex < 0 ||
+            typeof mark.paragraphText !== 'string' ||
+            !mark.paragraphText.trim()
+        ) {
+            return null
+        }
+
+        return {
+            paragraphIndex: mark.paragraphIndex,
+            paragraphText: mark.paragraphText
+        }
+    } catch {
+        return null
+    }
+}
+
 export function recordArticleView(article: ArticleInformation): void {
     const previousHistory = getReadingHistory()
 

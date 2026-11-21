@@ -188,7 +188,8 @@ export default function PersonalPage() {
                     </div>
                 ) : (
                     <div className="personal-page-list">
-                        {visibleArticles.map((article) => (
+                        {visibleArticles.map((article) => {
+                        return (
                             <article
                                 key={article.sourceUrl}
                                 className="personal-page-article"
@@ -242,7 +243,8 @@ export default function PersonalPage() {
                                     </button>
                                 ) : null}
                             </article>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </div>

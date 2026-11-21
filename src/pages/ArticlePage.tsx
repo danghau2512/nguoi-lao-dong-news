@@ -1,7 +1,6 @@
-
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, CircleAlert, Highlighter, X } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CheckCircle2, CircleAlert, X } from 'lucide-react'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
@@ -9,7 +8,9 @@ import {
     recordArticleView,
     toggleSavedArticle,
     getReadingProgress,
-    saveReadingProgress
+    saveReadingProgress,
+    getReadingMark,
+    saveReadingMark
 } from '../services/personalStorage'
 
 import ArticleToolbar from '../components/ArticleToolbar'
@@ -65,6 +66,19 @@ function ArticleDetailView({
 
     const [fontSize, setFontSize] = useState<number>()
     const articleContentRef = useRef<HTMLDivElement>(null)
+
+    const [readingMark, setReadingMark] = useState(() => getReadingMark(sourceUrl))
+    const [markMessage, setMarkMessage] = useState('')
+    const [markButtonPosition, setMarkButtonPosition] = useState<{
+        top: number
+        left: number
+    } | null>(null)
+
+    const contentHtml = article?.contentHtml
+    const articleBodyHtml = useMemo(
+        () => ({ __html: contentHtml ?? '' }),
+        [contentHtml]
+    )
     const [readingProgress, setReadingProgress] = useState(0)
 
     const [isSaved, setIsSaved] = useState(() => {
@@ -257,6 +271,120 @@ function ArticleDetailView({
         }
     }, [article, sourceUrl])
 
+    useEffect(() => {
+        function updateMarkButton() {
+            const content = articleContentRef.current
+            const selection = window.getSelection()
+
+            if (!content || !selection || !selection.rangeCount || !selection.toString().trim()) {
+                setMarkButtonPosition(null)
+                return
+            }
+
+            const range = selection.getRangeAt(0)
+            const startNode = range.startContainer
+            const startElement = startNode instanceof Element
+                ? startNode
+                : startNode.parentElement
+
+            const paragraph = startElement?.closest('p')
+
+            if (!paragraph || !content.contains(paragraph) || !paragraph.contains(range.endContainer)) {
+                setMarkButtonPosition(null)
+                return
+            }
+
+            const rect = range.getBoundingClientRect()
+            const buttonWidth = Math.min(200, window.innerWidth - 16)
+
+            setMarkButtonPosition({
+                top: rect.top >= 56 ? rect.top - 48 : rect.bottom + 8,
+                left: Math.max(8, Math.min(rect.left, window.innerWidth - buttonWidth - 8))
+            })
+        }
+
+        function hideMarkButton() {
+            setMarkButtonPosition(null)
+        }
+
+        document.addEventListener('selectionchange', updateMarkButton)
+        window.addEventListener('scroll', hideMarkButton)
+        window.addEventListener('resize', hideMarkButton)
+
+        return () => {
+            document.removeEventListener('selectionchange', updateMarkButton)
+            window.removeEventListener('scroll', hideMarkButton)
+            window.removeEventListener('resize', hideMarkButton)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!markMessage) return
+
+        const timeout = window.setTimeout(() => setMarkMessage(''), 2500)
+
+        return () => window.clearTimeout(timeout)
+    }, [markMessage])
+
+    function handleMarkReadingPlace() {
+        const content = articleContentRef.current
+        const selection = window.getSelection()
+
+        if (!content || !selection || !selection.toString().trim()) {
+            setMarkMessage('Hãy bôi chọn chữ trong thân bài trước.')
+            return
+        }
+
+        const range = selection.getRangeAt(0)
+        const paragraphs = Array.from(content.querySelectorAll('p'))
+
+        const paragraphIndex = paragraphs.findIndex((paragraph) =>
+            paragraph.contains(range.startContainer) &&
+            paragraph.contains(range.endContainer)
+        )
+
+        if (paragraphIndex === -1) {
+            setMarkMessage('Hãy bôi chọn chữ trong cùng một đoạn văn.')
+            return
+        }
+
+        const mark = {
+            paragraphIndex,
+            paragraphText: paragraphs[paragraphIndex].textContent?.trim() ?? ''
+        }
+
+        try {
+            saveReadingMark(sourceUrl, mark)
+            setReadingMark(mark)
+            selection.removeAllRanges()
+            setMarkButtonPosition(null)
+            setMarkMessage('Đã lưu chỗ đọc tại đây.')
+        } catch {
+            setMarkMessage('Trình duyệt không lưu được dấu. Hãy thử lại.')
+        }
+    }
+
+    useEffect(() => {
+        const content = articleContentRef.current
+        if (!content || !readingMark) return
+
+        const paragraphs = Array.from(content.querySelectorAll('p'))
+        const savedParagraph = paragraphs[readingMark.paragraphIndex]
+
+        const markedParagraph =
+            savedParagraph?.textContent?.trim() === readingMark.paragraphText
+                ? savedParagraph
+                : paragraphs.find(
+                    (paragraph) => paragraph.textContent?.trim() === readingMark.paragraphText
+                )
+
+        markedParagraph?.classList.add('article-page__marked-paragraph')
+
+        return () => {
+            markedParagraph?.classList.remove('article-page__marked-paragraph')
+        }
+    }, [articleBodyHtml, readingMark])
+
     const errorMessage = sourceError || error
 
     if (article === null) {
@@ -376,15 +504,35 @@ function ArticleDetailView({
                 contentHtml={article.contentHtml}
             />
 
+            {markButtonPosition && (
+                <button
+                    type="button"
+                    className="article-page__mark-popup"
+                    style={{
+                        top: markButtonPosition.top,
+                        left: markButtonPosition.left
+                    }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={handleMarkReadingPlace}
+                >
+                    <Highlighter size={16} aria-hidden="true" />
+                    Đánh dấu chỗ đọc
+                </button>
+            )}
+
+            <div
+                role="status"
+                className={markMessage ? 'article-page__mark-toast' : undefined}
+            >
+                {markMessage}
+            </div>
+
             <div
                 className="article-page__content"
-              ref={articleContentRef}
+                ref={articleContentRef}
                 style={{ fontSize }}
-                dangerouslySetInnerHTML={{
-                    __html: article.contentHtml
-                }}
+                dangerouslySetInnerHTML={articleBodyHtml}
             />
-
             <ArticleComments
                 key={sourceUrl}
                 sourceUrl={sourceUrl}
