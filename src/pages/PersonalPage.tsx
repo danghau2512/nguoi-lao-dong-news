@@ -5,7 +5,8 @@ import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
     getReadingHistory,
-    removeSavedArticle
+    removeSavedArticle,
+    getReadingMark
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import './PersonalPage.css'
@@ -189,7 +190,11 @@ export default function PersonalPage() {
                 ) : (
                     <div className="personal-page-list">
                         {visibleArticles.map((article) => {
-                        return (
+                            const readingMark = activeTab === 'history'
+                                ? getReadingMark(article.sourceUrl)
+                                : null
+
+                            return (
                             <article
                                 key={article.sourceUrl}
                                 className="personal-page-article"
@@ -201,6 +206,10 @@ export default function PersonalPage() {
                                             {article.title}
                                         </Link>
                                     </h3>
+
+                                    {readingMark !== null && (
+                                        <p className="personal-page-time">Đã đánh dấu chỗ đọc</p>
+                                    )}
 
                                     {article.description !== '' ? (
                                         <p className="personal-page-description">
