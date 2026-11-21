@@ -33,11 +33,19 @@ export default function ArticlePage() {
     const [searchParams] = useSearchParams()
 
     const sourceUrl = searchParams.get('url')?.trim() ?? ''
+    const shouldResume = searchParams.get('resume') === '1'
+
+    useEffect(() => {
+        if (!shouldResume) {
+            window.scrollTo(0, 0)
+        }
+    }, [sourceUrl, shouldResume])
 
     return (
         <ArticleDetailView
-            key={sourceUrl}
+            key={`${sourceUrl}:${shouldResume}`}
             sourceUrl={sourceUrl}
+            shouldResume={shouldResume}
         />
     )
 }
@@ -55,10 +63,9 @@ function isValidArticleUrl(sourceUrl: string): boolean {
     }
 }
 
-function ArticleDetailView({
-                               sourceUrl
-                           }: {
+function ArticleDetailView({ sourceUrl, shouldResume}: {
     sourceUrl: string
+    shouldResume: boolean
 }) {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
@@ -66,6 +73,7 @@ function ArticleDetailView({
 
     const [fontSize, setFontSize] = useState<number>()
     const articleContentRef = useRef<HTMLDivElement>(null)
+    const hasResumedRef = useRef(false)
 
     const [readingMark, setReadingMark] = useState(() => getReadingMark(sourceUrl))
     const [markMessage, setMarkMessage] = useState('')
@@ -379,11 +387,15 @@ function ArticleDetailView({
                 )
 
         markedParagraph?.classList.add('article-page__marked-paragraph')
+        if (shouldResume && markedParagraph && !hasResumedRef.current) {
+            hasResumedRef.current = true
+            markedParagraph.scrollIntoView({ block: 'center' })
+        }
 
         return () => {
             markedParagraph?.classList.remove('article-page__marked-paragraph')
         }
-    }, [articleBodyHtml, readingMark])
+    }, [articleBodyHtml, readingMark, shouldResume])
 
     const errorMessage = sourceError || error
 

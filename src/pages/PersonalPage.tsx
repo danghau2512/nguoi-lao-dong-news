@@ -13,7 +13,7 @@ import './PersonalPage.css'
 
 type PersonalTab = 'saved' | 'history'
 
-function getArticlePath(article: PersonalArticle): string {
+function getArticlePath(article: PersonalArticle, shouldResume = false): string {
     const matchedId = article.sourceUrl.match(/-(\d+)\.ldo(?:[?#].*)?$/)
 
     let articleId = 'nguon'
@@ -25,6 +25,9 @@ function getArticlePath(article: PersonalArticle): string {
     const params = new URLSearchParams({
         url: article.sourceUrl
     })
+    if (shouldResume) {
+        params.set('resume', '1')
+    }
 
     return '/bai-viet/' + articleId + '?' + params.toString()
 }
@@ -208,7 +211,13 @@ export default function PersonalPage() {
                                     </h3>
 
                                     {readingMark !== null && (
-                                        <p className="personal-page-time">Đã đánh dấu chỗ đọc</p>
+                                        <p className="personal-page-time">
+                                            Đã đánh dấu chỗ đọc
+                                            {' · '}
+                                            <Link to={getArticlePath(article, true)}>
+                                                Đọc tiếp
+                                            </Link>
+                                        </p>
                                     )}
 
                                     {article.description !== '' ? (
