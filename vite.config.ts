@@ -3,6 +3,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { handleArticleAiRequest } from './server/articleAi.ts'
 import { handleViettelTtsRequest } from './server/viettelTts.ts'
+import { handleViettelSttRequest } from './server/viettelStt.ts'
 
 const laodongRssProxy: Plugin = {
   name: 'laodong-rss-proxy',
@@ -302,13 +303,48 @@ const viettelTtsProxy: Plugin = {
   }
 }
 
+const viettelSttProxy: Plugin = {
+  name: 'viettel-stt-proxy',
+
+  configureServer(server) {
+    const env = loadEnv(
+        server.config.mode,
+        server.config.root,
+        ''
+    )
+
+    server.middlewares.use((req, res, next) => {
+      const requestUrl = new URL(
+          req.url ?? '/',
+          'http://localhost'
+      )
+
+      if (requestUrl.pathname !== '/api/stt') {
+        next()
+        return
+      }
+
+      const token =
+          env.VIETTEL_STT_TOKEN ||
+          env.VIETTEL_AI_TOKEN
+
+      void handleViettelSttRequest(
+          req,
+          res,
+          token
+      )
+    })
+  }
+}
+
 export default defineConfig({
   plugins: [
     react(),
     laodongRssProxy,
     laodongArticleProxy,
     geminiArticleProxy,
-    viettelTtsProxy
+    viettelTtsProxy,
+    viettelSttProxy
   ],
 
   server: {
