@@ -5,14 +5,15 @@ import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
     getReadingHistory,
-    removeSavedArticle
+    removeSavedArticle,
+    getReadingMark
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import './PersonalPage.css'
 
 type PersonalTab = 'saved' | 'history'
 
-function getArticlePath(article: PersonalArticle): string {
+function getArticlePath(article: PersonalArticle, shouldResume = false): string {
     const matchedId = article.sourceUrl.match(/-(\d+)\.ldo(?:[?#].*)?$/)
 
     let articleId = 'nguon'
@@ -24,6 +25,9 @@ function getArticlePath(article: PersonalArticle): string {
     const params = new URLSearchParams({
         url: article.sourceUrl
     })
+    if (shouldResume) {
+        params.set('resume', '1')
+    }
 
     return '/bai-viet/' + articleId + '?' + params.toString()
 }
@@ -188,7 +192,12 @@ export default function PersonalPage() {
                     </div>
                 ) : (
                     <div className="personal-page-list">
-                        {visibleArticles.map((article) => (
+                        {visibleArticles.map((article) => {
+                            const readingMark = activeTab === 'history'
+                                ? getReadingMark(article.sourceUrl)
+                                : null
+
+                            return (
                             <article
                                 key={article.sourceUrl}
                                 className="personal-page-article"
@@ -200,6 +209,16 @@ export default function PersonalPage() {
                                             {article.title}
                                         </Link>
                                     </h3>
+
+                                    {readingMark !== null && (
+                                        <p className="personal-page-time">
+                                            Đã đánh dấu chỗ đọc
+                                            {' · '}
+                                            <Link to={getArticlePath(article, true)}>
+                                                Đọc tiếp
+                                            </Link>
+                                        </p>
+                                    )}
 
                                     {article.description !== '' ? (
                                         <p className="personal-page-description">
@@ -242,7 +261,8 @@ export default function PersonalPage() {
                                     </button>
                                 ) : null}
                             </article>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </div>
