@@ -1,8 +1,7 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-const VIETTEL_STT_URL =
-    'https://viettelgroup.ai/voice/api/asr/v1/rest/decode_file'
+const VIETTEL_STT_URL = 'https://viettelai.vn/asr/recognize'
 
 const MAX_AUDIO_SIZE = 2 * 1024 * 1024
 
@@ -12,10 +11,12 @@ function sendJson(
     data: object
 ) {
     res.statusCode = status
+
     res.setHeader(
         'Content-Type',
         'application/json; charset=utf-8'
     )
+
     res.setHeader('Cache-Control', 'no-store')
     res.end(JSON.stringify(data))
 }
@@ -43,17 +44,25 @@ function getTranscript(value: unknown): string {
 
     const data = value as Record<string, unknown>
 
-    for (const key of ['transcript', 'text', 'utterance', 'sentence']) {
+    for (const key of [
+        'transcript',
+        'text',
+        'utterance',
+        'sentence',
+        'transcription'
+    ]) {
         if (typeof data[key] === 'string') {
             return data[key].trim()
         }
     }
 
     for (const key of [
+        'response',
         'result',
         'results',
         'hypotheses',
         'alternatives',
+        'segments',
         'data'
     ]) {
         if (data[key] !== undefined) {
@@ -82,7 +91,7 @@ export async function handleViettelSttRequest(
         return
     }
 
-    if (!token) {
+    if (!token || token.trim() === '') {
         sendJson(res, 503, {
             message: 'Chưa cấu hình Viettel STT token.'
         })
@@ -127,9 +136,11 @@ export async function handleViettelSttRequest(
 
     const audioBuffer = Buffer.concat(chunks)
 
-    if (audioBuffer.length < 44 ||
+    if (
+        audioBuffer.length < 44 ||
         audioBuffer.toString('ascii', 0, 4) !== 'RIFF' ||
-        audioBuffer.toString('ascii', 8, 12) !== 'WAVE') {
+        audioBuffer.toString('ascii', 8, 12) !== 'WAVE'
+    ) {
         sendJson(res, 400, {
             message: 'Nội dung file WAV không hợp lệ.'
         })
@@ -146,39 +157,113 @@ export async function handleViettelSttRequest(
         'voice-search.wav'
     )
 
+    formData.append('token', token.trim())
+
     try {
         const response = await fetch(VIETTEL_STT_URL, {
             method: 'POST',
             headers: {
-                token: token
+                accept: '*/*'
             },
             body: formData,
             signal: AbortSignal.timeout(30000)
         })
 
-        if (!response.ok) {
-            console.error(
-                'Viettel STT HTTP status:',
-                response.status
-            )
+        let result: unknown
 
+        try {
+            result = await response.json()
+        } catch {
             sendJson(res, 502, {
-                message:
-                    'Viettel STT trả về HTTP ' +
-                    response.status +
-                    '. Kiểm tra endpoint và quyền token.'
+                message: 'Viettel STT không trả về JSON hợp lệ.'
             })
             return
         }
 
-        const result: unknown = await response.json()
-        const transcript = getTranscript(result)
+        if (
+            typeof result !== 'object' ||
+            result === null ||
+            Array.isArray(result)
+        ) {
+            sendJson(res, 502, {
+                message: 'Dữ liệu trả về từ Viettel không hợp lệ.'
+            })
+            return
+        }
 
-        if (transcript === '') {
+        const data = result as Record<string, unknown>
+
+        if (!response.ok || data.code !== 200) {
+            const errorCode = typeof data.code === 'number'
+                ? data.code
+                : response.status
+
+            const apiMessage = typeof data.message === 'string'
+                ? data.message
+                : 'Không xác định được nguyên nhân.'
+
+            console.error(
+                'Lỗi Viettel STT:',
+                'HTTP:', response.status,
+                'Code:', data.code,
+                'Message:', apiMessage
+            )
+
+            if (errorCode === 401) {
+                sendJson(res, 502, {
+                    message:
+                        'Viettel STT chưa xác thực được token. ' +
+                        'Kiểm tra token trong file .env.'
+                })
+                return
+            }
+
+            if (errorCode === 403) {
+                sendJson(res, 502, {
+                    message:
+                        'Token hiện tại không có quyền sử dụng Viettel STT.'
+                })
+                return
+            }
+
+            if (errorCode === 400) {
+                sendJson(res, 502, {
+                    message:
+                        'Viettel STT báo dữ liệu đầu vào không hợp lệ.'
+                })
+                return
+            }
+
             sendJson(res, 502, {
                 message:
-                    'Chưa đọc được văn bản từ phản hồi Viettel. ' +
-                    'Cần kiểm tra cấu trúc JSON thực tế.'
+                    'Viettel STT trả về lỗi. HTTP ' +
+                    response.status +
+                    ', mã API ' +
+                    String(data.code ?? 'không có') +
+                    '.'
+            })
+            return
+        }
+
+        if (data.response === undefined || data.response === null) {
+            sendJson(res, 502, {
+                message:
+                    'Viettel STT trả về thành công nhưng thiếu kết quả.'
+            })
+            return
+        }
+
+        const transcript = getTranscript(data.response)
+
+        if (transcript === '') {
+            console.error(
+                'Không tìm thấy trường văn bản trong response Viettel.'
+            )
+
+            sendJson(res, 502, {
+                message:
+                    'Chưa đọc được văn bản từ phản hồi Viettel STT. ' +
+                    'Cần kiểm tra cấu trúc response thực tế.'
             })
             return
         }
@@ -187,10 +272,13 @@ export async function handleViettelSttRequest(
             transcript: transcript
         })
     } catch (error) {
-        console.error(
-            'Lỗi gọi Viettel STT:',
-            error instanceof Error ? error.message : 'Unknown'
-        )
+        console.error('Lỗi gọi Viettel STT:', error)
+
+        if (error instanceof Error) {
+            console.error('Tên lỗi:', error.name)
+            console.error('Thông báo lỗi:', error.message)
+            console.error('Nguyên nhân gốc:', error.cause)
+        }
 
         sendJson(res, 502, {
             message: 'Không thể kết nối Viettel Speech-to-Text.'
