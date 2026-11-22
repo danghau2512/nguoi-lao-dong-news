@@ -23,7 +23,7 @@ export function useVoiceRecorder() {
             throw new Error('Trình duyệt không hỗ trợ ghi âm.')
         }
 
-        if (recorderRef.current?.state === 'recording') {
+        if (recorderRef.current) {
             return
         }
 
@@ -34,9 +34,9 @@ export function useVoiceRecorder() {
         try {
             const recorder = new MediaRecorder(stream)
 
+            chunksRef.current = []
             streamRef.current = stream
             recorderRef.current = recorder
-            chunksRef.current = []
 
             recorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -47,7 +47,7 @@ export function useVoiceRecorder() {
             recorder.start()
             setIsRecording(true)
         } catch (error) {
-            stream.getTracks().forEach((track) => track.stop())
+            releaseStream()
             throw error
         }
     }
@@ -57,7 +57,7 @@ export function useVoiceRecorder() {
 
         if (!recorder || recorder.state !== 'recording') {
             return Promise.reject(
-                new Error('Không có bản ghi âm đang hoạt động.')
+                new Error('Micro chưa bắt đầu ghi âm.')
             )
         }
 
@@ -68,6 +68,7 @@ export function useVoiceRecorder() {
                 })
 
                 releaseStream()
+                setIsRecording(false)
 
                 if (audio.size === 0) {
                     reject(new Error('Không thu được âm thanh.'))
@@ -79,11 +80,11 @@ export function useVoiceRecorder() {
 
             recorder.onerror = () => {
                 releaseStream()
+                setIsRecording(false)
                 reject(new Error('Có lỗi khi ghi âm.'))
             }
 
             recorder.stop()
-            setIsRecording(false)
         })
     }
 
@@ -91,7 +92,7 @@ export function useVoiceRecorder() {
         return () => {
             const recorder = recorderRef.current
 
-            if (recorder?.state === 'recording') {
+            if (recorder && recorder.state === 'recording') {
                 recorder.stop()
             }
 
