@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, CircleAlert, Highlighter, X } from 'lucide-react'
+import { CheckCircle2, CircleAlert, Highlighter, LoaderCircle, X } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { fetchArticleDetail } from '../services/articleService'
@@ -16,9 +16,18 @@ import {
 import ArticleToolbar from '../components/ArticleToolbar'
 import ArticleComments from '../components/ArticleComments'
 import ArticleAiAssistant from '../components/ArticleAiAssistant'
+import ArticleLoading from '../components/ArticleLoading'
+
+import {
+    ARTICLE_AUDIO_VOICES,
+    DEFAULT_ARTICLE_AUDIO_VOICE
+} from '../constants/articleAudioVoices'
+import { useArticleAudio } from '../hooks/useArticleAudio'
+import { getArticleSpeechText } from '../utils/articleSpeechText'
 
 import './ArticlePage.css'
 import './ArticleSave.css'
+
 
 type ArticleDetail = Awaited<ReturnType<typeof fetchArticleDetail>>
 
@@ -40,6 +49,7 @@ export default function ArticlePage() {
             window.scrollTo(0, 0)
         }
     }, [sourceUrl, shouldResume])
+
 
     return (
         <ArticleDetailView
@@ -70,8 +80,10 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
-
     const [fontSize, setFontSize] = useState<number>()
+    const [playbackRate, setPlaybackRate] = useState(1)
+    const [voice, setVoice] = useState(DEFAULT_ARTICLE_AUDIO_VOICE)
+    const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false)
     const articleContentRef = useRef<HTMLDivElement>(null)
     const hasResumedRef = useRef(false)
 
@@ -89,6 +101,7 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     )
     const [readingProgress, setReadingProgress] = useState(0)
 
+    const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio(playbackRate)
     const [isSaved, setIsSaved] = useState(() => {
         return isArticleSaved(sourceUrl)
     })
@@ -237,7 +250,9 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
         let lastSavedPercent = getReadingProgress(sourceUrl)
 
         const updateReadingProgress = () => {
-            const { top, bottom, height } = content.getBoundingClientRect()
+            const { top, bottom, height } =
+                content.getBoundingClientRect()
+
             const viewportHeight = window.innerHeight
             const scrollDistance = height - viewportHeight
 
@@ -400,15 +415,13 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     const errorMessage = sourceError || error
 
     if (article === null) {
+        if (errorMessage === '') {
+            return <ArticleLoading />
+        }
+
         return (
             <section className="article-page">
-                {errorMessage !== '' ? (
-                    <p role="alert">{errorMessage}</p>
-                ) : (
-                    <p role="status">
-                        Đang tải bài viết…
-                    </p>
-                )}
+                <p role="alert">{errorMessage}</p>
 
                 {error !== '' && sourceError === '' ? (
                     <button
@@ -426,9 +439,31 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
         )
     }
 
+    const listenControl = {
+        idle: {
+            label: 'Đọc bài',
+            onClick: () => {
+                const text = getArticleSpeechText(article.title, article.contentHtml)
+                playArticle(text, voice)
+            },
+        },
+        loading: { label: 'Đọc bài', onClick: undefined },
+        ready: { label: 'Đọc bài', onClick: resumeArticle },
+        playing: { label: 'Tạm dừng', onClick: pauseArticle },
+        paused: { label: 'Tiếp tục', onClick: resumeArticle },
+
+    }[status]
+    const isGeneratingAudio = status === 'loading'
+    const toastType = isGeneratingAudio ? 'loading' : saveMessageType
+    const toastMessage = isGeneratingAudio ? 'Đang tạo âm thanh…' : saveMessage
+
+    const ToastIcon = {
+        loading: LoaderCircle,
+        success: CheckCircle2,
+        error: CircleAlert,
+    }[toastType]
     return (
         <article className="article-page">
-
             <div
                 className="article-reading-progress"
                 role="progressbar"
@@ -437,56 +472,34 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
                 style={{ width: `${readingProgress}%` }}
             />
 
-            {saveMessage !== '' ? (
+            {toastMessage && (
                 <div
-                    className={
-                        saveMessageType === 'success'
-                            ? 'article-save-toast article-save-toast-success'
-                            : 'article-save-toast article-save-toast-error'
-                    }
-                    role={
-                        saveMessageType === 'error'
-                            ? 'alert'
-                            : 'status'
-                    }
+                    className={`article-save-toast article-save-toast-${toastType}`}
+                    role={toastType === 'error' ? 'alert' : 'status'}
                 >
                     <div className="article-save-toast-icon">
-                        {saveMessageType === 'success' ? (
-                            <CheckCircle2
-                                size={23}
-                                aria-hidden="true"
-                            />
-                        ) : (
-                            <CircleAlert
-                                size={23}
-                                aria-hidden="true"
-                            />
-                        )}
+                        <ToastIcon size={23} aria-hidden="true" />
                     </div>
 
                     <div className="article-save-toast-content">
                         <strong>
-                            {saveMessageType === 'success'
-                                ? 'Thông báo'
-                                : 'Có lỗi xảy ra'}
+                            {toastType === 'error' ? 'Có lỗi xảy ra' : 'Thông báo'}
                         </strong>
-
-                        <p>{saveMessage}</p>
+                        <p>{toastMessage}</p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="article-save-toast-close"
-                        onClick={handleCloseNotification}
-                        aria-label="Đóng thông báo"
-                    >
-                        <X
-                            size={19}
-                            aria-hidden="true"
-                        />
-                    </button>
+                    {!isGeneratingAudio && (
+                        <button
+                            type="button"
+                            className="article-save-toast-close"
+                            onClick={handleCloseNotification}
+                            aria-label="Đóng thông báo"
+                        >
+                            <X size={19} aria-hidden="true" />
+                        </button>
+                    )}
                 </div>
-            ) : null}
+            )}
 
             <header className="article-page__header">
                 <h1 className="article-page__title">
@@ -508,7 +521,42 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
                     isSaved={isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
+                    onListen={listenControl.onClick}
+                    onAudioSettings={() => setIsAudioSettingsOpen((open) => !open)}
+                    audioSettings={isAudioSettingsOpen && (
+                        <>
+                            <strong>Cài đặt đọc bài</strong>
+
+                            <label>
+                                Giọng đọc
+                                <select value={voice} onChange={(event) => setVoice(event.target.value)}>
+                                    {ARTICLE_AUDIO_VOICES.map(({ id, label }) => (
+                                        <option key={id} value={id}>{label}</option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Tốc độ đọc
+                                <select
+                                    value={playbackRate}
+                                    onChange={(event) => setPlaybackRate(Number(event.target.value))}
+                                >
+                                    <option value={0.75}>0,75×</option>
+                                    <option value={1}>1×</option>
+                                    <option value={1.25}>1,25×</option>
+                                    <option value={1.5}>1,5×</option>
+                                </select>
+                            </label>
+
+                            {status !== 'idle' && (
+                                <small>Giọng đã chọn áp dụng từ lượt đọc tiếp theo.</small>
+                            )}
+                        </>
+                    )}
+                    listenLabel={listenControl.label}
                 />
+                {audioError && <p role="alert">{audioError}</p>}
             </header>
 
             <ArticleAiAssistant

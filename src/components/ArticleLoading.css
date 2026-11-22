@@ -1,0 +1,152 @@
+
+.article-loading {
+    width: 100%;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 50px 20px;
+}
+
+.article-loading p {
+    margin: 0;
+    color: var(--theme-muted);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.article-loading-icon {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.article-loading-piece {
+    position: absolute;
+    display: block;
+    background-color: #e52536;
+    border-radius: 7px;
+    transform-origin: center;
+}
+
+.piece-one {
+    width: 13px;
+    height: 30px;
+    left: 47px;
+    top: 4px;
+    rotate: -18deg;
+
+    animation: piece-one-animation 4s ease-in-out infinite;
+}
+
+.piece-two {
+    width: 30px;
+    height: 13px;
+    left: 55px;
+    top: 40px;
+    rotate: -18deg;
+
+    animation: piece-two-animation 4s ease-in-out infinite;
+}
+
+.piece-three {
+    width: 13px;
+    height: 30px;
+    left: 31px;
+    top: 54px;
+    rotate: -18deg;
+
+    animation: piece-three-animation 4s ease-in-out infinite;
+}
+
+.piece-four {
+    width: 30px;
+    height: 13px;
+    left: 5px;
+    top: 27px;
+    rotate: -18deg;
+
+    animation: piece-four-animation 4s ease-in-out infinite;
+}
+
+@keyframes piece-one-animation {
+    0% {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.3);
+    }
+
+    12%, 92% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.3);
+    }
+}
+
+@keyframes piece-two-animation {
+    0%, 12% {
+        opacity: 0;
+        transform: translateX(18px) scale(0.3);
+    }
+
+    24%, 82% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    92%, 100% {
+        opacity: 0;
+        transform: translateX(18px) scale(0.3);
+    }
+}
+
+@keyframes piece-three-animation {
+    0%, 24% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.3);
+    }
+
+    36%, 72% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    82%, 100% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.3);
+    }
+}
+
+@keyframes piece-four-animation {
+    0%, 36% {
+        opacity: 0;
+        transform: translateX(-18px) scale(0.3);
+    }
+
+    48%, 62% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    72%, 100% {
+        opacity: 0;
+        transform: translateX(-18px) scale(0.3);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .article-loading-piece {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+.article-loading .article-loading-piece {
+    animation-duration: 2s;
+}

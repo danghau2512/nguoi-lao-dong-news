@@ -1,7 +1,8 @@
 
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { handleArticleAiRequest } from './server/articleAi'
+import { handleArticleAiRequest } from './server/articleAi.ts'
+import { handleViettelTtsRequest } from './server/viettelTts.ts'
 
 const laodongRssProxy: Plugin = {
   name: 'laodong-rss-proxy',
@@ -15,8 +16,8 @@ const laodongRssProxy: Plugin = {
 
       try {
         const sourceUrl =
-            'https://laodong.vn' +
-            req.url.replace(/^\/api\/laodong/, '')
+          'https://laodong.vn' +
+          req.url.replace(/^\/api\/laodong/, '')
 
         const headers: Record<string, string> = {
           Accept: 'application/rss+xml, application/xml, text/xml'
@@ -31,12 +32,12 @@ const laodongRssProxy: Plugin = {
 
         if (!/<rss(?:\s|>)/i.test(xml)) {
           const cookie = xml.match(
-              /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
+            /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
           )?.[1]
 
           if (!cookie) {
             throw new Error(
-                'Nguồn không trả về RSS hoặc mẫu cookie D1N đã thay đổi'
+              'Nguồn không trả về RSS hoặc mẫu cookie D1N đã thay đổi'
             )
           }
 
@@ -52,34 +53,38 @@ const laodongRssProxy: Plugin = {
 
         if (!response.ok) {
           throw new Error(
-              `Nguồn trả về HTTP ${response.status}`
+            `Nguồn trả về HTTP ${response.status}`
           )
         }
 
         if (!/<rss(?:\s|>)/i.test(xml)) {
           throw new Error(
-              'Nguồn vẫn chưa trả về RSS sau khi gửi cookie'
+            'Nguồn vẫn chưa trả về RSS sau khi gửi cookie'
           )
         }
 
         res.statusCode = 200
+
         res.setHeader(
-            'Content-Type',
-            'application/xml; charset=utf-8'
+          'Content-Type',
+          'application/xml; charset=utf-8'
         )
+
         res.end(xml)
       } catch (error) {
         const message = error instanceof Error
-            ? error.message
-            : 'Không lấy được RSS'
+          ? error.message
+          : 'Không lấy được RSS'
 
         console.error('Lỗi RSS Lao Động:', message)
 
         res.statusCode = 502
+
         res.setHeader(
-            'Content-Type',
-            'text/plain; charset=utf-8'
+          'Content-Type',
+          'text/plain; charset=utf-8'
         )
+
         res.end(message)
       }
     })
@@ -92,8 +97,8 @@ const laodongArticleProxy: Plugin = {
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
       const requestUrl = new URL(
-          req.url ?? '/',
-          'http://localhost'
+        req.url ?? '/',
+        'http://localhost'
       )
 
       if (requestUrl.pathname !== '/api/laodong/article') {
@@ -103,10 +108,12 @@ const laodongArticleProxy: Plugin = {
 
       const sendError = (status: number, message: string) => {
         res.statusCode = status
+
         res.setHeader(
-            'Content-Type',
-            'application/json; charset=utf-8'
+          'Content-Type',
+          'application/json; charset=utf-8'
         )
+
         res.end(JSON.stringify({ message }))
       }
 
@@ -120,25 +127,25 @@ const laodongArticleProxy: Plugin = {
 
       try {
         sourceUrl = new URL(
-            requestUrl.searchParams.get('url') ?? ''
+          requestUrl.searchParams.get('url') ?? ''
         )
       } catch {
         sendError(
-            400,
-            'Thiếu URL bài viết hoặc URL không hợp lệ'
+          400,
+          'Thiếu URL bài viết hoặc URL không hợp lệ'
         )
         return
       }
 
       if (
-          sourceUrl.origin !== 'https://laodong.vn' ||
-          sourceUrl.username ||
-          sourceUrl.password ||
-          !sourceUrl.pathname.endsWith('.ldo')
+        sourceUrl.origin !== 'https://laodong.vn' ||
+        sourceUrl.username ||
+        sourceUrl.password ||
+        !sourceUrl.pathname.endsWith('.ldo')
       ) {
         sendError(
-            400,
-            'Chỉ hỗ trợ URL bài viết HTTPS thuộc laodong.vn'
+          400,
+          'Chỉ hỗ trợ URL bài viết HTTPS thuộc laodong.vn'
         )
         return
       }
@@ -159,7 +166,7 @@ const laodongArticleProxy: Plugin = {
         let html = await response.text()
 
         const cookie = html.match(
-            /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
+          /document\.cookie\s*=\s*["'](D1N=[a-f0-9]+)["']/i
         )?.[1]
 
         if (cookie) {
@@ -176,19 +183,19 @@ const laodongArticleProxy: Plugin = {
 
         if (!response.ok) {
           throw new Error(
-              `Nguồn trả về HTTP ${response.status}`
+            `Nguồn trả về HTTP ${response.status}`
           )
         }
 
         if (/document\.cookie\s*=\s*["']D1N=/i.test(html)) {
           throw new Error(
-              'Nguồn vẫn yêu cầu xác minh cookie'
+            'Nguồn vẫn yêu cầu xác minh cookie'
           )
         }
 
         if (
-            !response.headers.get('content-type')
-                ?.includes('text/html')
+          !response.headers.get('content-type')
+            ?.includes('text/html')
         ) {
           throw new Error('Nguồn không trả về HTML')
         }
@@ -198,32 +205,35 @@ const laodongArticleProxy: Plugin = {
         }
 
         res.statusCode = 200
+
         res.setHeader(
-            'Content-Type',
-            'text/html; charset=utf-8'
+          'Content-Type',
+          'text/html; charset=utf-8'
         )
+
         res.setHeader(
-            'Content-Security-Policy',
-            "sandbox; default-src 'none'"
+          'Content-Security-Policy',
+          "sandbox; default-src 'none'"
         )
+
         res.end(html)
       } catch (error) {
         console.error('Lỗi lấy bài Lao Động:', error)
 
         if (
-            error instanceof Error &&
-            error.name === 'TimeoutError'
+          error instanceof Error &&
+          error.name === 'TimeoutError'
         ) {
           sendError(
-              504,
-              'Hết thời gian chờ lấy bài viết'
+            504,
+            'Hết thời gian chờ lấy bài viết'
           )
           return
         }
 
         const message = error instanceof Error
-            ? error.message
-            : 'Không lấy được bài viết'
+          ? error.message
+          : 'Không lấy được bài viết'
 
         sendError(502, message)
       }
@@ -236,15 +246,15 @@ const geminiArticleProxy: Plugin = {
 
   configureServer(server) {
     const environment = loadEnv(
-        server.config.mode,
-        server.config.root,
-        ''
+      server.config.mode,
+      server.config.root,
+      ''
     )
 
     server.middlewares.use(async (req, res, next) => {
       const requestUrl = new URL(
-          req.url ?? '/',
-          'http://localhost'
+        req.url ?? '/',
+        'http://localhost'
       )
 
       if (requestUrl.pathname !== '/api/ai/article') {
@@ -253,10 +263,40 @@ const geminiArticleProxy: Plugin = {
       }
 
       await handleArticleAiRequest(
-          req,
-          res,
-          environment.GEMINI_API_KEY,
-          environment.GEMINI_MODEL
+        req,
+        res,
+        environment.GEMINI_API_KEY,
+        environment.GEMINI_MODEL
+      )
+    })
+  }
+}
+
+const viettelTtsProxy: Plugin = {
+  name: 'viettel-tts-proxy',
+
+  configureServer(server) {
+    const env = loadEnv(
+      server.config.mode,
+      server.config.root,
+      ''
+    )
+
+    server.middlewares.use((req, res, next) => {
+      const requestUrl = new URL(
+        req.url ?? '/',
+        'http://localhost'
+      )
+
+      if (requestUrl.pathname !== '/api/tts') {
+        next()
+        return
+      }
+
+      void handleViettelTtsRequest(
+        req,
+        res,
+        env.VIETTEL_AI_TOKEN
       )
     })
   }
@@ -267,7 +307,8 @@ export default defineConfig({
     react(),
     laodongRssProxy,
     laodongArticleProxy,
-    geminiArticleProxy
+    geminiArticleProxy,
+    viettelTtsProxy
   ],
 
   server: {
@@ -276,6 +317,7 @@ export default defineConfig({
         target: 'https://laodong.vn',
         changeOrigin: true,
         followRedirects: true,
+
         rewrite: (path) => {
           return path.replace(/^\/api\/laodong/, '')
         }

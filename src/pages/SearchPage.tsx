@@ -1,14 +1,19 @@
 
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import type { NewsArticle } from '../types/news'
 import { useCategoryNews } from '../hooks/useCategoryNews'
 import { searchArticles } from '../services/newsService'
 import NewsCard from '../components/NewsCard'
 import NewsStatus from '../components/NewsStatus'
+import Pagination from '../components/Pagination'
 import './SearchPage.css'
+
+const PAGE_SIZE = 10
 
 export default function SearchPage() {
     const [searchParams] = useSearchParams()
+    const [currentPage, setCurrentPage] = useState(1)
 
     const thoiSu = useCategoryNews('thoi-su')
     const kinhDoanh = useCategoryNews('kinh-doanh')
@@ -73,11 +78,45 @@ export default function SearchPage() {
         searchKeyword = queryValue.trim()
     }
 
-    const searchResults = searchArticles(articles, searchKeyword)
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchKeyword])
+
+    const searchResults = searchArticles(
+        articles,
+        searchKeyword
+    )
+
+    const totalPages = Math.ceil(
+        searchResults.length / PAGE_SIZE
+    )
+
+    const validPage = Math.min(
+        currentPage,
+        Math.max(1, totalPages)
+    )
+
+    const startIndex = (validPage - 1) * PAGE_SIZE
+    const endIndex = startIndex + PAGE_SIZE
+
+    const currentResults = searchResults.slice(
+        startIndex,
+        endIndex
+    )
+
+    function handlePageChange(page: number) {
+        setCurrentPage(page)
+
+        document.querySelector(
+            '.search-page-heading'
+        )?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        })
+    }
 
     return (
         <div className="search-page">
-
             <div className="search-page-breadcrumb">
                 <Link to="/">Trang chủ</Link>
 
@@ -103,7 +142,6 @@ export default function SearchPage() {
             </div>
 
             <div className="search-page-content">
-
                 {searchKeyword === '' ? (
                     <div className="search-page-message">
                         <i
@@ -122,7 +160,6 @@ export default function SearchPage() {
                     <NewsStatus type="loading" />
                 ) : bothFailed === true ? (
                     <div className="search-page-error">
-
                         <NewsStatus
                             type="error"
                             message="Không thể tải dữ liệu từ cả hai nguồn RSS."
@@ -142,7 +179,6 @@ export default function SearchPage() {
                                 Thử lại
                             </button>
                         </div>
-
                     </div>
                 ) : (
                     <>
@@ -189,22 +225,37 @@ export default function SearchPage() {
                             Tìm thấy {searchResults.length} bài viết
                             phù hợp với từ khóa
                             <strong> "{searchKeyword}"</strong>
+
+                            {searchResults.length > 0 ? (
+                                <>
+                                    . Đang hiển thị {startIndex + 1}–
+                                    {Math.min(endIndex, searchResults.length)}
+                                </>
+                            ) : null}
                         </p>
 
                         {searchResults.length > 0 ? (
-                            <div className="search-page-news-list">
-                                {searchResults.map((news) => (
-                                    <NewsCard
-                                        key={news.id}
-                                        id={news.id}
-                                        title={news.title}
-                                        description={news.description}
-                                        imageUrl={news.imageUrl}
-                                        categorySlug={news.categorySlug}
-                                        sourceUrl={news.sourceUrl}
-                                    />
-                                ))}
-                            </div>
+                            <>
+                                <div className="search-page-news-list">
+                                    {currentResults.map((news) => (
+                                        <NewsCard
+                                            key={news.id}
+                                            id={news.id}
+                                            title={news.title}
+                                            description={news.description}
+                                            imageUrl={news.imageUrl}
+                                            categorySlug={news.categorySlug}
+                                            sourceUrl={news.sourceUrl}
+                                        />
+                                    ))}
+                                </div>
+
+                                <Pagination
+                                    currentPage={validPage}
+                                    totalPages={totalPages}
+                                    onPageChange={handlePageChange}
+                                />
+                            </>
                         ) : (
                             <NewsStatus
                                 type="empty"
@@ -214,9 +265,7 @@ export default function SearchPage() {
                         )}
                     </>
                 )}
-
             </div>
-
         </div>
     )
 }
