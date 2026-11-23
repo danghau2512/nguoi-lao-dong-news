@@ -37,7 +37,7 @@ export default function MainLayout() {
 
     return (
         <div className="app-layout">
-            <Header />
+            <Header isLoggedIn={user !== null}/>
 
             <main className="container page-content">
                 <Suspense fallback={<RouteLoading />}>

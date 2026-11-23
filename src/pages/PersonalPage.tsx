@@ -1,6 +1,6 @@
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useOutletContext } from 'react-router-dom'
 import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
@@ -10,6 +10,7 @@ import {
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import './PersonalPage.css'
+import type { AuthContext } from '../layout/MainLayout'
 
 type PersonalTab = 'saved' | 'history'
 
@@ -46,6 +47,7 @@ function getTimeLabel(timestamp: number): string {
 }
 
 export default function PersonalPage() {
+    const { user } = useOutletContext<AuthContext>()
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
     const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
@@ -82,6 +84,10 @@ export default function PersonalPage() {
 
     if (activeTab === 'history') {
         visibleArticles = historyArticles
+    }
+
+    if (!user) {
+        return <Navigate to="/dang-nhap" replace />
     }
 
     return (

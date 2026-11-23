@@ -53,7 +53,7 @@ function getSavedTheme(): Theme {
     return 'light'
 }
 
-export default function Header() {
+export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
     const [searchKeyword, setSearchKeyword] = useState('')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
@@ -206,10 +206,10 @@ export default function Header() {
                         </form>
 
                         <NavLink
-                            to="/ca-nhan"
+                            to={isLoggedIn ? '/ca-nhan' : '/dang-nhap'}
                             className="news-header-profile-link"
-                            aria-label="Trang cá nhân"
-                            title="Bài viết đã lưu và lịch sử đọc"
+                            aria-label={isLoggedIn ? 'Trang cá nhân' : 'Đăng nhập'}
+                            title={isLoggedIn ? 'Bài viết đã lưu và lịch sử đọc' : 'Đăng nhập'}
                             onClick={() => {
                                 setIsMenuOpen(false)
                             }}
