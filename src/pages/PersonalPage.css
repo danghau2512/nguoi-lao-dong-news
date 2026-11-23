@@ -258,3 +258,45 @@
         font-size: 17px;
     }
 }
+
+.personal-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.personal-page-heading .personal-page-greeting {
+    margin: 8px 0 0;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.personal-page-logout {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border: 1px solid #c92833;
+    border-radius: 8px;
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.personal-page-logout:hover {
+    background-color: #c92833;
+    color: #fff;
+}
+
+.personal-page-logout:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .personal-page-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

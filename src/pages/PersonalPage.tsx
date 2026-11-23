@@ -47,7 +47,7 @@ function getTimeLabel(timestamp: number): string {
 }
 
 export default function PersonalPage() {
-    const { user } = useOutletContext<AuthContext>()
+    const { user, updateUser } = useOutletContext<AuthContext>()
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
     const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
@@ -94,11 +94,21 @@ export default function PersonalPage() {
         <section className="personal-page">
 
             <div className="personal-page-heading">
-                <h1>Trang cá nhân</h1>
+                <div>
+                    <h1>Trang cá nhân</h1>
 
-                <p>
-                    Quản lý bài viết đã lưu và lịch sử đọc của bạn
-                </p>
+                    <p className="personal-page-greeting">
+                        Xin chào, <strong>{user.name}</strong>!
+                    </p>
+                </div>
+
+                <button
+                    className="personal-page-logout"
+                    type="button"
+                    onClick={() => updateUser(null)}
+                >
+                    Đăng xuất
+                </button>
             </div>
 
             <div
