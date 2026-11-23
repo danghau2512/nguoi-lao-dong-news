@@ -1,12 +1,15 @@
 import './LoginPage.css'
 import { useState, type FormEvent } from 'react'
 import { login } from '../services/authService'
+import { Navigate, useOutletContext } from 'react-router-dom'
+import type { AuthContext } from '../layout/MainLayout'
 
 export default function LoginPage() {
 
+    const { user, updateUser } = useOutletContext<AuthContext>()
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -17,12 +20,11 @@ export default function LoginPage() {
         const password = String(formData.get('password') ?? '')
 
         setError('')
-        setSuccess('')
         setIsLoading(true)
 
         try {
             const loggedInUser = await login(email, password)
-            setSuccess(`Đăng nhập thành công. Xin chào, ${loggedInUser.name}!`)
+            updateUser(loggedInUser)
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Đăng nhập thất bại.')
         } finally {
@@ -30,6 +32,9 @@ export default function LoginPage() {
         }
     }
 
+    if (user) {
+        return <Navigate to="/ca-nhan" replace />
+    }
     return (
         <section className="login-page">
             <h1>Đăng nhập</h1>
@@ -54,7 +59,6 @@ export default function LoginPage() {
                 />
 
                 {error && <p role="alert">{error}</p>}
-                {success && <p role="status">{success}</p>}
 
                 <button type="submit" disabled={isLoading}>
                     {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
