@@ -253,7 +253,14 @@ export async function handleViettelSttRequest(
             return
         }
 
+        console.log(
+            'Viettel STT response:',
+            JSON.stringify(data.response, null, 2)
+        )
+
         const transcript = getTranscript(data.response)
+
+        console.log('Văn bản trích xuất:', transcript)
 
         if (transcript === '') {
             console.error(
