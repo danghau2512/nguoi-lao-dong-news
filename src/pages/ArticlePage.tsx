@@ -1,13 +1,16 @@
-
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, CircleAlert, Highlighter, LoaderCircle, X } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CheckCircle2, CircleAlert, LoaderCircle, X } from 'lucide-react'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
     isArticleSaved,
     recordArticleView,
-    toggleSavedArticle
+    toggleSavedArticle,
+    getReadingProgress,
+    saveReadingProgress,
+    getReadingMark,
+    saveReadingMark
 } from '../services/personalStorage'
 
 import ArticleToolbar from '../components/ArticleToolbar'
@@ -39,15 +42,20 @@ export default function ArticlePage() {
     const [searchParams] = useSearchParams()
 
     const sourceUrl = searchParams.get('url')?.trim() ?? ''
+    const shouldResume = searchParams.get('resume') === '1'
 
     useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [sourceUrl])
+        if (!shouldResume) {
+            window.scrollTo(0, 0)
+        }
+    }, [sourceUrl, shouldResume])
+
 
     return (
         <ArticleDetailView
-            key={sourceUrl}
+            key={`${sourceUrl}:${shouldResume}`}
             sourceUrl={sourceUrl}
+            shouldResume={shouldResume}
         />
     )
 }
@@ -65,8 +73,9 @@ function isValidArticleUrl(sourceUrl: string): boolean {
     }
 }
 
-function ArticleDetailView({ sourceUrl }: {
+function ArticleDetailView({ sourceUrl, shouldResume}: {
     sourceUrl: string
+    shouldResume: boolean
 }) {
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
@@ -76,6 +85,20 @@ function ArticleDetailView({ sourceUrl }: {
     const [voice, setVoice] = useState(DEFAULT_ARTICLE_AUDIO_VOICE)
     const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false)
     const articleContentRef = useRef<HTMLDivElement>(null)
+    const hasResumedRef = useRef(false)
+
+    const [readingMark, setReadingMark] = useState(() => getReadingMark(sourceUrl))
+    const [markMessage, setMarkMessage] = useState('')
+    const [markButtonPosition, setMarkButtonPosition] = useState<{
+        top: number
+        left: number
+    } | null>(null)
+
+    const contentHtml = article?.contentHtml
+    const articleBodyHtml = useMemo(
+        () => ({ __html: contentHtml ?? '' }),
+        [contentHtml]
+    )
     const [readingProgress, setReadingProgress] = useState(0)
 
     const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio(playbackRate)
@@ -224,6 +247,8 @@ function ArticleDetailView({ sourceUrl }: {
             return
         }
 
+        let lastSavedPercent = getReadingProgress(sourceUrl)
+
         const updateReadingProgress = () => {
             const { top, bottom, height } =
                 content.getBoundingClientRect()
@@ -231,50 +256,161 @@ function ArticleDetailView({ sourceUrl }: {
             const viewportHeight = window.innerHeight
             const scrollDistance = height - viewportHeight
 
-            if (scrollDistance <= 0) {
-                setReadingProgress(
-                    bottom <= viewportHeight ? 100 : 0
-                )
+            const percent = scrollDistance <= 0
+                ? (bottom <= viewportHeight ? 100 : 0)
+                : Math.min(100, Math.max(0, (-top / scrollDistance) * 100))
+
+            setReadingProgress(percent)
+            return percent
+        }
+
+        let lastScrollPercent = Math.floor(updateReadingProgress())
+
+        const handleScroll = () => {
+            const percent = Math.floor(updateReadingProgress())
+
+            if (percent === lastScrollPercent) {
                 return
             }
 
-            const percent = (-top / scrollDistance) * 100
+            lastScrollPercent = percent
 
-            setReadingProgress(
-                Math.min(100, Math.max(0, percent))
-            )
+            if (percent > 0 && percent !== lastSavedPercent) {
+                saveReadingProgress(sourceUrl, percent)
+                lastSavedPercent = percent
+            }
         }
 
-        updateReadingProgress()
-
-        window.addEventListener(
-            'scroll',
-            updateReadingProgress,
-            { passive: true }
-        )
-
-        window.addEventListener(
-            'resize',
-            updateReadingProgress
-        )
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        window.addEventListener('resize', updateReadingProgress)
 
         const observer = new ResizeObserver(updateReadingProgress)
         observer.observe(content)
 
         return () => {
-            window.removeEventListener(
-                'scroll',
-                updateReadingProgress
-            )
-
-            window.removeEventListener(
-                'resize',
-                updateReadingProgress
-            )
-
+            window.removeEventListener('scroll', handleScroll)
+            window.removeEventListener('resize', updateReadingProgress)
             observer.disconnect()
         }
-    }, [article])
+    }, [article, sourceUrl])
+
+    useEffect(() => {
+        function updateMarkButton() {
+            const content = articleContentRef.current
+            const selection = window.getSelection()
+
+            if (!content || !selection || !selection.rangeCount || !selection.toString().trim()) {
+                setMarkButtonPosition(null)
+                return
+            }
+
+            const range = selection.getRangeAt(0)
+            const startNode = range.startContainer
+            const startElement = startNode instanceof Element
+                ? startNode
+                : startNode.parentElement
+
+            const paragraph = startElement?.closest('p')
+
+            if (!paragraph || !content.contains(paragraph) || !paragraph.contains(range.endContainer)) {
+                setMarkButtonPosition(null)
+                return
+            }
+
+            const rect = range.getBoundingClientRect()
+            const buttonWidth = Math.min(200, window.innerWidth - 16)
+
+            setMarkButtonPosition({
+                top: rect.top >= 56 ? rect.top - 48 : rect.bottom + 8,
+                left: Math.max(8, Math.min(rect.left, window.innerWidth - buttonWidth - 8))
+            })
+        }
+
+        function hideMarkButton() {
+            setMarkButtonPosition(null)
+        }
+
+        document.addEventListener('selectionchange', updateMarkButton)
+        window.addEventListener('scroll', hideMarkButton)
+        window.addEventListener('resize', hideMarkButton)
+
+        return () => {
+            document.removeEventListener('selectionchange', updateMarkButton)
+            window.removeEventListener('scroll', hideMarkButton)
+            window.removeEventListener('resize', hideMarkButton)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!markMessage) return
+
+        const timeout = window.setTimeout(() => setMarkMessage(''), 2500)
+
+        return () => window.clearTimeout(timeout)
+    }, [markMessage])
+
+    function handleMarkReadingPlace() {
+        const content = articleContentRef.current
+        const selection = window.getSelection()
+
+        if (!content || !selection || !selection.toString().trim()) {
+            setMarkMessage('Hãy bôi chọn chữ trong thân bài trước.')
+            return
+        }
+
+        const range = selection.getRangeAt(0)
+        const paragraphs = Array.from(content.querySelectorAll('p'))
+
+        const paragraphIndex = paragraphs.findIndex((paragraph) =>
+            paragraph.contains(range.startContainer) &&
+            paragraph.contains(range.endContainer)
+        )
+
+        if (paragraphIndex === -1) {
+            setMarkMessage('Hãy bôi chọn chữ trong cùng một đoạn văn.')
+            return
+        }
+
+        const mark = {
+            paragraphIndex,
+            paragraphText: paragraphs[paragraphIndex].textContent?.trim() ?? ''
+        }
+
+        try {
+            saveReadingMark(sourceUrl, mark)
+            setReadingMark(mark)
+            selection.removeAllRanges()
+            setMarkButtonPosition(null)
+            setMarkMessage('Đã lưu chỗ đọc tại đây.')
+        } catch {
+            setMarkMessage('Trình duyệt không lưu được dấu. Hãy thử lại.')
+        }
+    }
+
+    useEffect(() => {
+        const content = articleContentRef.current
+        if (!content || !readingMark) return
+
+        const paragraphs = Array.from(content.querySelectorAll('p'))
+        const savedParagraph = paragraphs[readingMark.paragraphIndex]
+
+        const markedParagraph =
+            savedParagraph?.textContent?.trim() === readingMark.paragraphText
+                ? savedParagraph
+                : paragraphs.find(
+                    (paragraph) => paragraph.textContent?.trim() === readingMark.paragraphText
+                )
+
+        markedParagraph?.classList.add('article-page__marked-paragraph')
+        if (shouldResume && markedParagraph && !hasResumedRef.current) {
+            hasResumedRef.current = true
+            markedParagraph.scrollIntoView({ block: 'center' })
+        }
+
+        return () => {
+            markedParagraph?.classList.remove('article-page__marked-paragraph')
+        }
+    }, [articleBodyHtml, readingMark, shouldResume])
 
     const errorMessage = sourceError || error
 
@@ -428,15 +564,35 @@ function ArticleDetailView({ sourceUrl }: {
                 contentHtml={article.contentHtml}
             />
 
+            {markButtonPosition && (
+                <button
+                    type="button"
+                    className="article-page__mark-popup"
+                    style={{
+                        top: markButtonPosition.top,
+                        left: markButtonPosition.left
+                    }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={handleMarkReadingPlace}
+                >
+                    <Highlighter size={16} aria-hidden="true" />
+                    Đánh dấu chỗ đọc
+                </button>
+            )}
+
+            <div
+                role="status"
+                className={markMessage ? 'article-page__mark-toast' : undefined}
+            >
+                {markMessage}
+            </div>
+
             <div
                 className="article-page__content"
                 ref={articleContentRef}
                 style={{ fontSize }}
-                dangerouslySetInnerHTML={{
-                    __html: article.contentHtml
-                }}
+                dangerouslySetInnerHTML={articleBodyHtml}
             />
-
             <ArticleComments
                 key={sourceUrl}
                 sourceUrl={sourceUrl}

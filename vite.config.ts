@@ -245,29 +245,28 @@ const laodongArticleProxy: Plugin = {
   }
 }
 
-
 const geminiArticleProxy: Plugin = {
   name: 'gemini-article-proxy',
 
   configureServer(server) {
     const environment = loadEnv(
-        server.config.mode,
-        server.config.root,
-        ''
+      server.config.mode,
+      server.config.root,
+      ''
     )
 
     server.middlewares.use(async (req, res, next) => {
       const requestUrl = new URL(
-          req.url ?? '/',
-          'http://localhost'
+        req.url ?? '/',
+        'http://localhost'
       )
 
       if (requestUrl.pathname === '/api/ai/search-keyword') {
         await handleSearchKeywordRequest(
-            req,
-            res,
-            environment.GEMINI_API_KEY,
-            environment.GEMINI_MODEL
+          req,
+          res,
+          environment.GEMINI_API_KEY,
+          environment.GEMINI_MODEL
         )
 
         return
@@ -279,15 +278,14 @@ const geminiArticleProxy: Plugin = {
       }
 
       await handleArticleAiRequest(
-          req,
-          res,
-          environment.GEMINI_API_KEY,
-          environment.GEMINI_MODEL
+        req,
+        res,
+        environment.GEMINI_API_KEY,
+        environment.GEMINI_MODEL
       )
     })
   }
 }
-
 
 const viettelTtsProxy: Plugin = {
   name: 'viettel-tts-proxy',
@@ -324,15 +322,15 @@ const viettelSttProxy: Plugin = {
 
   configureServer(server) {
     const env = loadEnv(
-        server.config.mode,
-        server.config.root,
-        ''
+      server.config.mode,
+      server.config.root,
+      ''
     )
 
     server.middlewares.use((req, res, next) => {
       const requestUrl = new URL(
-          req.url ?? '/',
-          'http://localhost'
+        req.url ?? '/',
+        'http://localhost'
       )
 
       if (requestUrl.pathname !== '/api/stt') {
@@ -341,14 +339,88 @@ const viettelSttProxy: Plugin = {
       }
 
       const token =
-          env.VIETTEL_STT_TOKEN ||
-          env.VIETTEL_AI_TOKEN
+        env.VIETTEL_STT_TOKEN ||
+        env.VIETTEL_AI_TOKEN
 
       void handleViettelSttRequest(
-          req,
-          res,
-          token
+        req,
+        res,
+        token
       )
+    })
+  }
+}
+
+const fakeAuthApi: Plugin = {
+  name: 'fake-auth-api',
+
+  configureServer(server) {
+    server.middlewares.use('/api/auth/login', async (req, res) => {
+      function sendJson(status: number, data: object) {
+        res.statusCode = status
+        res.setHeader(
+          'Content-Type',
+          'application/json; charset=utf-8'
+        )
+        res.end(JSON.stringify(data))
+      }
+
+      if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST')
+        sendJson(405, {
+          message: 'API chỉ hỗ trợ POST.'
+        })
+        return
+      }
+
+      let body = ''
+
+      try {
+        for await (const chunk of req) {
+          body += String(chunk)
+
+          if (body.length > 4096) {
+            sendJson(413, {
+              message: 'Dữ liệu gửi lên quá lớn.'
+            })
+            return
+          }
+        }
+
+        const credentials = JSON.parse(body)
+
+        if (
+          typeof credentials?.email !== 'string' ||
+          typeof credentials?.password !== 'string'
+        ) {
+          sendJson(400, {
+            message: 'Vui lòng nhập email và mật khẩu.'
+          })
+          return
+        }
+
+        const email = credentials.email.trim().toLowerCase()
+
+        if (
+          email !== '3aetest@example.com' ||
+          credentials.password !== 'Test1234'
+        ) {
+          sendJson(401, {
+            message: 'Email hoặc mật khẩu không đúng.'
+          })
+          return
+        }
+
+        sendJson(200, {
+          id: 1,
+          name: '3ae test',
+          email,
+        })
+      } catch {
+        sendJson(400, {
+          message: 'Dữ liệu đăng nhập không hợp lệ.'
+        })
+      }
     })
   }
 }
@@ -360,7 +432,8 @@ export default defineConfig({
     laodongArticleProxy,
     geminiArticleProxy,
     viettelTtsProxy,
-    viettelSttProxy
+    viettelSttProxy,
+    fakeAuthApi
   ],
 
   server: {

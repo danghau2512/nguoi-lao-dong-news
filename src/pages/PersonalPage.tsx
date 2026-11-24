@@ -1,18 +1,20 @@
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useOutletContext } from 'react-router-dom'
 import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
     getReadingHistory,
-    removeSavedArticle
+    removeSavedArticle,
+    getReadingMark
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import './PersonalPage.css'
+import type { AuthContext } from '../layout/MainLayout'
 
 type PersonalTab = 'saved' | 'history'
 
-function getArticlePath(article: PersonalArticle): string {
+function getArticlePath(article: PersonalArticle, shouldResume = false): string {
     const matchedId = article.sourceUrl.match(/-(\d+)\.ldo(?:[?#].*)?$/)
 
     let articleId = 'nguon'
@@ -24,6 +26,9 @@ function getArticlePath(article: PersonalArticle): string {
     const params = new URLSearchParams({
         url: article.sourceUrl
     })
+    if (shouldResume) {
+        params.set('resume', '1')
+    }
 
     return '/bai-viet/' + articleId + '?' + params.toString()
 }
@@ -42,6 +47,7 @@ function getTimeLabel(timestamp: number): string {
 }
 
 export default function PersonalPage() {
+    const { user, updateUser } = useOutletContext<AuthContext>()
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
     const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
@@ -80,15 +86,29 @@ export default function PersonalPage() {
         visibleArticles = historyArticles
     }
 
+    if (!user) {
+        return <Navigate to="/dang-nhap" replace />
+    }
+
     return (
         <section className="personal-page">
 
             <div className="personal-page-heading">
-                <h1>Trang cá nhân</h1>
+                <div>
+                    <h1>Trang cá nhân</h1>
 
-                <p>
-                    Quản lý bài viết đã lưu và lịch sử đọc của bạn
-                </p>
+                    <p className="personal-page-greeting">
+                        Xin chào, <strong>{user.name}</strong>!
+                    </p>
+                </div>
+
+                <button
+                    className="personal-page-logout"
+                    type="button"
+                    onClick={() => updateUser(null)}
+                >
+                    Đăng xuất
+                </button>
             </div>
 
             <div
@@ -188,7 +208,12 @@ export default function PersonalPage() {
                     </div>
                 ) : (
                     <div className="personal-page-list">
-                        {visibleArticles.map((article) => (
+                        {visibleArticles.map((article) => {
+                            const readingMark = activeTab === 'history'
+                                ? getReadingMark(article.sourceUrl)
+                                : null
+
+                            return (
                             <article
                                 key={article.sourceUrl}
                                 className="personal-page-article"
@@ -200,6 +225,16 @@ export default function PersonalPage() {
                                             {article.title}
                                         </Link>
                                     </h3>
+
+                                    {readingMark !== null && (
+                                        <p className="personal-page-time">
+                                            Đã đánh dấu chỗ đọc
+                                            {' · '}
+                                            <Link to={getArticlePath(article, true)}>
+                                                Đọc tiếp
+                                            </Link>
+                                        </p>
+                                    )}
 
                                     {article.description !== '' ? (
                                         <p className="personal-page-description">
@@ -242,7 +277,8 @@ export default function PersonalPage() {
                                     </button>
                                 ) : null}
                             </article>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </div>
