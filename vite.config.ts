@@ -302,13 +302,64 @@ const viettelTtsProxy: Plugin = {
   }
 }
 
+const fakeAuthApi: Plugin = {
+  name: 'fake-auth-api',
+
+  configureServer(server) {
+    server.middlewares.use('/api/auth/login', async (req, res) => {
+      function sendJson(status: number, data: object) {
+        res.statusCode = status
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.end(JSON.stringify(data))
+      }
+      if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST')
+        sendJson(405, { message: 'API chỉ hỗ trợ POST.' })
+        return
+      }
+
+      let body = ''
+      try {
+        for await (const chunk of req) {
+          body += String(chunk)
+          if (body.length > 4096) {
+            sendJson(413, { message: 'Dữ liệu gửi lên quá lớn.' })
+            return
+          }
+        }
+        const credentials = JSON.parse(body)
+        if (
+            typeof credentials?.email !== 'string' ||
+            typeof credentials?.password !== 'string'
+        ) {
+          sendJson(400, { message: 'Vui lòng nhập email và mật khẩu.' })
+          return
+        }
+        const email = credentials.email.trim().toLowerCase()
+
+        if (email !== '3aetest@example.com' || credentials.password !== 'Test1234') {
+          sendJson(401, { message: 'Email hoặc mật khẩu không đúng.' })
+          return
+        }
+        sendJson(200, {
+          id: 1,
+          name: '3ae test',
+          email,
+        })
+      } catch {
+        sendJson(400, { message: 'Dữ liệu đăng nhập không hợp lệ.' })
+      }
+    })
+  },}
+
 export default defineConfig({
   plugins: [
     react(),
     laodongRssProxy,
     laodongArticleProxy,
     geminiArticleProxy,
-    viettelTtsProxy
+    viettelTtsProxy,
+      fakeAuthApi
   ],
 
   server: {

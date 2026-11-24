@@ -8,6 +8,7 @@ const CategoryPage = lazy(() => import('./pages/CategoryPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
 const ArticlePage = lazy(() => import('./pages/ArticlePage'))
 const PersonalPage = lazy(() => import('./pages/PersonalPage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
 
 export default function App() {
     return (
@@ -34,6 +35,8 @@ export default function App() {
                     path="ca-nhan"
                     element={<PersonalPage />}
                 />
+
+                <Route path="dang-nhap" element={<LoginPage />} />
 
                 <Route
                     path="*"

@@ -1,6 +1,6 @@
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useOutletContext } from 'react-router-dom'
 import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
@@ -10,6 +10,7 @@ import {
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import './PersonalPage.css'
+import type { AuthContext } from '../layout/MainLayout'
 
 type PersonalTab = 'saved' | 'history'
 
@@ -46,6 +47,7 @@ function getTimeLabel(timestamp: number): string {
 }
 
 export default function PersonalPage() {
+    const { user, updateUser } = useOutletContext<AuthContext>()
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
     const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
@@ -84,15 +86,29 @@ export default function PersonalPage() {
         visibleArticles = historyArticles
     }
 
+    if (!user) {
+        return <Navigate to="/dang-nhap" replace />
+    }
+
     return (
         <section className="personal-page">
 
             <div className="personal-page-heading">
-                <h1>Trang cá nhân</h1>
+                <div>
+                    <h1>Trang cá nhân</h1>
 
-                <p>
-                    Quản lý bài viết đã lưu và lịch sử đọc của bạn
-                </p>
+                    <p className="personal-page-greeting">
+                        Xin chào, <strong>{user.name}</strong>!
+                    </p>
+                </div>
+
+                <button
+                    className="personal-page-logout"
+                    type="button"
+                    onClick={() => updateUser(null)}
+                >
+                    Đăng xuất
+                </button>
             </div>
 
             <div
