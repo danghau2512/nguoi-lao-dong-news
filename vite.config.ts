@@ -1,7 +1,10 @@
 
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { handleArticleAiRequest } from './server/articleAi.ts'
+import {
+  handleArticleAiRequest,
+  handleSearchKeywordRequest
+} from './server/articleAi.ts'
 import { handleViettelTtsRequest } from './server/viettelTts.ts'
 import { handleViettelSttRequest } from './server/viettelStt.ts'
 
@@ -242,21 +245,33 @@ const laodongArticleProxy: Plugin = {
   }
 }
 
+
 const geminiArticleProxy: Plugin = {
   name: 'gemini-article-proxy',
 
   configureServer(server) {
     const environment = loadEnv(
-      server.config.mode,
-      server.config.root,
-      ''
+        server.config.mode,
+        server.config.root,
+        ''
     )
 
     server.middlewares.use(async (req, res, next) => {
       const requestUrl = new URL(
-        req.url ?? '/',
-        'http://localhost'
+          req.url ?? '/',
+          'http://localhost'
       )
+
+      if (requestUrl.pathname === '/api/ai/search-keyword') {
+        await handleSearchKeywordRequest(
+            req,
+            res,
+            environment.GEMINI_API_KEY,
+            environment.GEMINI_MODEL
+        )
+
+        return
+      }
 
       if (requestUrl.pathname !== '/api/ai/article') {
         next()
@@ -264,14 +279,15 @@ const geminiArticleProxy: Plugin = {
       }
 
       await handleArticleAiRequest(
-        req,
-        res,
-        environment.GEMINI_API_KEY,
-        environment.GEMINI_MODEL
+          req,
+          res,
+          environment.GEMINI_API_KEY,
+          environment.GEMINI_MODEL
       )
     })
   }
 }
+
 
 const viettelTtsProxy: Plugin = {
   name: 'viettel-tts-proxy',
