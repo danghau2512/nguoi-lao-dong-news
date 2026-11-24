@@ -1,6 +1,10 @@
 
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import {
+    Link,
+    useLocation,
+    useSearchParams
+} from 'react-router-dom'
 import type { NewsArticle } from '../types/news'
 import { useCategoryNews } from '../hooks/useCategoryNews'
 import { searchArticles } from '../services/newsService'
@@ -14,6 +18,12 @@ const PAGE_SIZE = 10
 export default function SearchPage() {
     const [searchParams] = useSearchParams()
     const [currentPage, setCurrentPage] = useState(1)
+    const location = useLocation()
+
+    const voiceInfo = location.state as {
+        voiceTranscript?: string
+        aiFailed?: boolean
+    } | null
 
     const thoiSu = useCategoryNews('thoi-su')
     const kinhDoanh = useCategoryNews('kinh-doanh')
@@ -131,14 +141,34 @@ export default function SearchPage() {
             <div className="search-page-heading">
                 <h1>Kết quả tìm kiếm</h1>
 
+
                 {searchKeyword !== '' ? (
-                    <p>
-                        Từ khóa:
-                        <strong> {searchKeyword}</strong>
-                    </p>
+                    <>
+                        {voiceInfo?.voiceTranscript ? (
+                            <p>
+                                Nội dung giọng nói:
+                                <strong>
+                                    {' ' + voiceInfo.voiceTranscript}
+                                </strong>
+                            </p>
+                        ) : null}
+
+                        <p>
+                            Từ khóa:
+                            <strong> {searchKeyword}</strong>
+                        </p>
+
+                        {voiceInfo?.aiFailed ? (
+                            <p role="status">
+                                Không thể phân tích từ khóa bằng Gemini.
+                                Hệ thống đang tìm kiếm bằng nội dung gốc.
+                            </p>
+                        ) : null}
+                    </>
                 ) : (
                     <p>Tìm kiếm các bài viết trên Góc Tin.</p>
                 )}
+
             </div>
 
             <div className="search-page-content">

@@ -6,6 +6,7 @@ import { Leaf, Mic, MicOff, Moon, Sun, UserRound } from 'lucide-react'
 import { categories } from '../constants/categories'
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder'
 import { transcribeWithViettel } from '../services/viettelSttService'
+import { extractSearchKeyword } from '../services/searchAiService'
 import './Header.css'
 import './HeaderProfile.css'
 
@@ -90,6 +91,7 @@ export default function Header() {
         }
     }
 
+
     async function handleVoiceSearch() {
         if (isVoiceLoading) {
             return
@@ -99,6 +101,8 @@ export default function Header() {
         setVoiceHasError(false)
 
         if (!isRecording) {
+            setIsVoiceLoading(true)
+
             try {
                 await startRecording()
 
@@ -122,12 +126,15 @@ export default function Header() {
                             : 'Không thể bật micro.'
                     )
                 }
+            } finally {
+                setIsVoiceLoading(false)
             }
 
             return
         }
 
         setIsVoiceLoading(true)
+
         setVoiceMessage(
             'Đang nhận dạng giọng nói bằng Viettel AI...'
         )
@@ -135,17 +142,40 @@ export default function Header() {
         try {
             const audio = await stopRecording()
 
-            const keyword = await transcribeWithViettel(audio)
+            const transcript = await transcribeWithViettel(audio)
 
-            if (keyword !== '') {
-                setSearchKeyword('')
-                setIsMenuOpen(false)
-                setVoiceMessage('')
-
-                navigate(
-                    '/tim-kiem?q=' + encodeURIComponent(keyword)
+            if (transcript.trim() === '') {
+                throw new Error(
+                    'Không nhận dạng được nội dung tìm kiếm.'
                 )
             }
+
+            setVoiceMessage(
+                'Gemini đang phân tích nội dung tìm kiếm...'
+            )
+
+            let keyword = transcript
+            let aiFailed = false
+
+            try {
+                keyword = await extractSearchKeyword(transcript)
+            } catch {
+                aiFailed = true
+            }
+
+            setSearchKeyword('')
+            setIsMenuOpen(false)
+            setVoiceMessage('')
+
+            navigate(
+                '/tim-kiem?q=' + encodeURIComponent(keyword),
+                {
+                    state: {
+                        voiceTranscript: transcript,
+                        aiFailed: aiFailed
+                    }
+                }
+            )
         } catch (error) {
             setVoiceHasError(true)
 
@@ -158,6 +188,7 @@ export default function Header() {
             setIsVoiceLoading(false)
         }
     }
+
 
     return (
         <>
