@@ -1,8 +1,12 @@
 
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { handleArticleAiRequest } from './server/articleAi.ts'
+import {
+  handleArticleAiRequest,
+  handleSearchKeywordRequest
+} from './server/articleAi.ts'
 import { handleViettelTtsRequest } from './server/viettelTts.ts'
+import { handleViettelSttRequest } from './server/viettelStt.ts'
 
 const laodongRssProxy: Plugin = {
   name: 'laodong-rss-proxy',
@@ -257,6 +261,17 @@ const geminiArticleProxy: Plugin = {
         'http://localhost'
       )
 
+      if (requestUrl.pathname === '/api/ai/search-keyword') {
+        await handleSearchKeywordRequest(
+          req,
+          res,
+          environment.GEMINI_API_KEY,
+          environment.GEMINI_MODEL
+        )
+
+        return
+      }
+
       if (requestUrl.pathname !== '/api/ai/article') {
         next()
         return
@@ -302,6 +317,40 @@ const viettelTtsProxy: Plugin = {
   }
 }
 
+const viettelSttProxy: Plugin = {
+  name: 'viettel-stt-proxy',
+
+  configureServer(server) {
+    const env = loadEnv(
+      server.config.mode,
+      server.config.root,
+      ''
+    )
+
+    server.middlewares.use((req, res, next) => {
+      const requestUrl = new URL(
+        req.url ?? '/',
+        'http://localhost'
+      )
+
+      if (requestUrl.pathname !== '/api/stt') {
+        next()
+        return
+      }
+
+      const token =
+        env.VIETTEL_STT_TOKEN ||
+        env.VIETTEL_AI_TOKEN
+
+      void handleViettelSttRequest(
+        req,
+        res,
+        token
+      )
+    })
+  }
+}
+
 const fakeAuthApi: Plugin = {
   name: 'fake-auth-api',
 
@@ -309,48 +358,72 @@ const fakeAuthApi: Plugin = {
     server.middlewares.use('/api/auth/login', async (req, res) => {
       function sendJson(status: number, data: object) {
         res.statusCode = status
-        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.setHeader(
+          'Content-Type',
+          'application/json; charset=utf-8'
+        )
         res.end(JSON.stringify(data))
       }
+
       if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST')
-        sendJson(405, { message: 'API chỉ hỗ trợ POST.' })
+        sendJson(405, {
+          message: 'API chỉ hỗ trợ POST.'
+        })
         return
       }
 
       let body = ''
+
       try {
         for await (const chunk of req) {
           body += String(chunk)
+
           if (body.length > 4096) {
-            sendJson(413, { message: 'Dữ liệu gửi lên quá lớn.' })
+            sendJson(413, {
+              message: 'Dữ liệu gửi lên quá lớn.'
+            })
             return
           }
         }
+
         const credentials = JSON.parse(body)
+
         if (
-            typeof credentials?.email !== 'string' ||
-            typeof credentials?.password !== 'string'
+          typeof credentials?.email !== 'string' ||
+          typeof credentials?.password !== 'string'
         ) {
-          sendJson(400, { message: 'Vui lòng nhập email và mật khẩu.' })
+          sendJson(400, {
+            message: 'Vui lòng nhập email và mật khẩu.'
+          })
           return
         }
+
         const email = credentials.email.trim().toLowerCase()
 
-        if (email !== '3aetest@example.com' || credentials.password !== 'Test1234') {
-          sendJson(401, { message: 'Email hoặc mật khẩu không đúng.' })
+        if (
+          email !== '3aetest@example.com' ||
+          credentials.password !== 'Test1234'
+        ) {
+          sendJson(401, {
+            message: 'Email hoặc mật khẩu không đúng.'
+          })
           return
         }
+
         sendJson(200, {
           id: 1,
           name: '3ae test',
           email,
         })
       } catch {
-        sendJson(400, { message: 'Dữ liệu đăng nhập không hợp lệ.' })
+        sendJson(400, {
+          message: 'Dữ liệu đăng nhập không hợp lệ.'
+        })
       }
     })
-  },}
+  }
+}
 
 export default defineConfig({
   plugins: [
@@ -359,7 +432,8 @@ export default defineConfig({
     laodongArticleProxy,
     geminiArticleProxy,
     viettelTtsProxy,
-      fakeAuthApi
+    viettelSttProxy,
+    fakeAuthApi
   ],
 
   server: {
