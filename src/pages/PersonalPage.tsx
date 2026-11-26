@@ -1,6 +1,6 @@
-
 import { useState } from 'react'
-import { Link, Navigate, useOutletContext } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, Navigate } from 'react-router-dom'
 import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
     getSavedArticles,
@@ -9,8 +9,9 @@ import {
     getReadingMark
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
+import { logoutUser } from '../store/authSlice'
+import type { AppDispatch, RootState } from '../store/store'
 import './PersonalPage.css'
-import type { AuthContext } from '../layout/MainLayout'
 
 type PersonalTab = 'saved' | 'history'
 
@@ -47,7 +48,8 @@ function getTimeLabel(timestamp: number): string {
 }
 
 export default function PersonalPage() {
-    const { user, updateUser } = useOutletContext<AuthContext>()
+    const dispatch = useDispatch<AppDispatch>()
+    const user = useSelector((state: RootState) => state.auth.user)
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
     const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
@@ -105,7 +107,7 @@ export default function PersonalPage() {
                 <button
                     className="personal-page-logout"
                     type="button"
-                    onClick={() => updateUser(null)}
+                    onClick={() => dispatch(logoutUser())}
                 >
                     Đăng xuất
                 </button>

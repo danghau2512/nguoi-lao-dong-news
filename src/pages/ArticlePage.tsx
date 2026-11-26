@@ -1,7 +1,8 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, CircleAlert, Highlighter, LoaderCircle, X } from 'lucide-react'
-import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
-import type { AuthContext } from '../layout/MainLayout'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../store/store'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
@@ -78,7 +79,7 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     sourceUrl: string
     shouldResume: boolean
 }) {
-    const { user } = useOutletContext<AuthContext>()
+    const user = useSelector((state: RootState) => state.auth.user)
     const navigate = useNavigate()
     const [shouldRedirectLogin, setShouldRedirectLogin] = useState(false)
     const [article, setArticle] = useState<ArticleDetail | null>(null)
