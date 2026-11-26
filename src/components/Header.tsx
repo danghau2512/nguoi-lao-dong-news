@@ -1,12 +1,13 @@
-
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useSelector } from 'react-redux'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Leaf, Mic, MicOff, Moon, Sun, UserRound } from 'lucide-react'
 import { categories } from '../constants/categories'
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder'
 import { transcribeWithViettel } from '../services/viettelSttService'
 import { extractSearchKeyword } from '../services/searchAiService'
+import type { RootState } from '../store/store'
 import './Header.css'
 import './HeaderProfile.css'
 
@@ -55,7 +56,14 @@ function getSavedTheme(): Theme {
     return 'light'
 }
 
-export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
+function getAvatarLetter(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean)
+    const lastWord = parts[parts.length - 1] ?? ''
+    return lastWord.charAt(0).toUpperCase() || 'U'
+}
+
+export default function Header() {
+    const user = useSelector((state: RootState) => state.auth.user)
     const [searchKeyword, setSearchKeyword] = useState('')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
@@ -363,57 +371,75 @@ export default function Header({ isLoggedIn }: { isLoggedIn: boolean }) {
                                     {voiceMessage}
                                 </p>
                             ) : null}
+                        </div>
+
+                        <div className="news-header-actions">
+                            <div
+                                className="news-header-theme"
+                                role="group"
+                                aria-label="Chế độ giao diện"
+                            >
+                                <button
+                                    type="button"
+                                    title="Sáng"
+                                    aria-label="Chế độ sáng"
+                                    aria-pressed={theme === 'light'}
+                                    onClick={() => setTheme('light')}
+                                >
+                                    <Sun size={18} aria-hidden="true" />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    title="Tối"
+                                    aria-label="Chế độ tối"
+                                    aria-pressed={theme === 'dark'}
+                                    onClick={() => setTheme('dark')}
+                                >
+                                    <Moon size={18} aria-hidden="true" />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    title="Dịu mắt"
+                                    aria-label="Chế độ dịu mắt"
+                                    aria-pressed={theme === 'sepia'}
+                                    onClick={() => setTheme('sepia')}
+                                >
+                                    <Leaf size={18} aria-hidden="true" />
+                                </button>
+                            </div>
 
                             <NavLink
-                                to={isLoggedIn ? '/ca-nhan' : '/dang-nhap'}
-                                className="news-header-profile-link"
-                                aria-label={isLoggedIn ? 'Trang cá nhân' : 'Đăng nhập'}
-                                title={isLoggedIn ? 'Bài viết đã lưu và lịch sử đọc' : 'Đăng nhập'}
+                                to={user ? '/ca-nhan' : '/dang-nhap'}
+                                className={
+                                    user
+                                        ? 'news-header-profile-link is-logged-in'
+                                        : 'news-header-profile-link'
+                                }
+                                aria-label={user ? `Trang cá nhân của ${user.name}` : 'Đăng nhập'}
+                                title={user ? `${user.name} - Bài viết đã lưu và lịch sử đọc` : 'Đăng nhập'}
                                 onClick={() => {
                                     setIsMenuOpen(false)
                                 }}
                             >
-                                <UserRound
-                                    size={22}
-                                    aria-hidden="true"
-                                />
+                                {user ? (
+                                    <>
+                                        <span className="news-header-avatar" aria-hidden="true">
+                                            {getAvatarLetter(user.name)}
+                                        </span>
+
+                                        <span className="news-header-username">
+                                            {user.name}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <UserRound
+                                        size={22}
+                                        aria-hidden="true"
+                                    />
+                                )}
                             </NavLink>
-                        </div>
-
-                        <div
-                            className="news-header-theme"
-                            role="group"
-                            aria-label="Chế độ giao diện"
-                        >
-                            <button
-                                type="button"
-                                title="Sáng"
-                                aria-label="Chế độ sáng"
-                                aria-pressed={theme === 'light'}
-                                onClick={() => setTheme('light')}
-                            >
-                                <Sun size={18} aria-hidden="true" />
-                            </button>
-
-                            <button
-                                type="button"
-                                title="Tối"
-                                aria-label="Chế độ tối"
-                                aria-pressed={theme === 'dark'}
-                                onClick={() => setTheme('dark')}
-                            >
-                                <Moon size={18} aria-hidden="true" />
-                            </button>
-
-                            <button
-                                type="button"
-                                title="Dịu mắt"
-                                aria-label="Chế độ dịu mắt"
-                                aria-pressed={theme === 'sepia'}
-                                onClick={() => setTheme('sepia')}
-                            >
-                                <Leaf size={18} aria-hidden="true" />
-                            </button>
                         </div>
                     </div>
                 </div>

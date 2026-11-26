@@ -1,11 +1,14 @@
 import './LoginPage.css'
 import { useEffect, useState, type FormEvent } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { login } from '../services/authService'
-import { useNavigate, useOutletContext } from 'react-router-dom'
-import type { AuthContext } from '../layout/MainLayout'
+import { setUser } from '../store/authSlice'
+import type { AppDispatch, RootState } from '../store/store'
 
 export default function LoginPage() {
-    const { user, updateUser } = useOutletContext<AuthContext>()
+    const dispatch = useDispatch<AppDispatch>()
+    const user = useSelector((state: RootState) => state.auth.user)
     const navigate = useNavigate()
 
     const [email, setEmail] = useState('')
@@ -50,7 +53,7 @@ export default function LoginPage() {
 
         try {
             const loggedInUser = await login(trimmedEmail, password)
-            updateUser(loggedInUser)
+            dispatch(setUser(loggedInUser))
             navigate('/ca-nhan')
         } catch (caughtError) {
             setError(
