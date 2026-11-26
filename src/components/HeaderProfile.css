@@ -1,40 +1,70 @@
-
 .news-header-controls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    width: 440px;
     margin-left: auto;
     min-width: 0;
 }
 
 .news-header-controls .news-header-search {
-    width: 440px;
-    flex: 1 1 440px;
+    width: 100%;
+}
+
+.news-header-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 16px;
 }
 
 .news-header-profile-link {
     width: 45px;
     height: 45px;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-
-    border: 1px solid #e3e3e3;
+    border: 1px solid var(--theme-border);
     border-radius: 50%;
-    background-color: #fff;
-
-    color: #444;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
     text-decoration: none;
     transition: border-color 0.2s, background-color 0.2s;
+}
+
+.news-header-profile-link.is-logged-in {
+    width: auto;
+    padding: 4px 14px 4px 5px;
+    gap: 9px;
+    border-radius: 999px;
+}
+
+.news-header-avatar {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #c92833;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.news-header-username {
+    max-width: 115px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .news-header-profile-link:hover,
 .news-header-profile-link[aria-current="page"] {
     border-color: #c92833;
-    background-color: #fff3f4;
-    color: #c92833;
+    background-color: var(--theme-surface);
+    color: var(--theme-accent);
 }
 
 .news-header-profile-link:focus-visible {
@@ -42,30 +72,23 @@
     outline-offset: 3px;
 }
 
-@media (max-width: 1199px) {
-    .news-header-controls {
-        width: min(520px, 65%);
-    }
-
-    .news-header-controls .news-header-search {
-        width: auto;
-        flex: 1 1 auto;
-    }
-}
-
 @media (max-width: 767px) {
     .news-header-controls {
         width: 100%;
-        gap: 10px;
     }
 
-    .news-header-controls .news-header-search {
-        width: 100%;
-        flex: 1 1 auto;
+    .news-header-actions {
+        justify-content: space-between;
     }
 
-    .news-header-profile-link {
+    .news-header-profile-link,
+    .news-header-profile-link.is-logged-in {
         width: 43px;
         height: 43px;
+        padding: 0;
+    }
+
+    .news-header-username {
+        display: none;
     }
 }
