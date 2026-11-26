@@ -1,19 +1,18 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, CircleAlert, Highlighter, LoaderCircle, X } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import type { RootState } from '../store/store'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
-    isArticleSaved,
     recordArticleView,
-    toggleSavedArticle,
     getReadingProgress,
     saveReadingProgress,
     getReadingMark,
     saveReadingMark
 } from '../services/personalStorage'
+import { toggleSave } from '../store/savedArticlesSlice'
+import type { AppDispatch, RootState } from '../store/store'
 
 import ArticleToolbar from '../components/ArticleToolbar'
 import ArticleComments from '../components/ArticleComments'
@@ -79,6 +78,7 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     sourceUrl: string
     shouldResume: boolean
 }) {
+    const dispatch = useDispatch<AppDispatch>()
     const user = useSelector((state: RootState) => state.auth.user)
     const navigate = useNavigate()
     const [shouldRedirectLogin, setShouldRedirectLogin] = useState(false)
@@ -107,9 +107,9 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     const [readingProgress, setReadingProgress] = useState(0)
 
     const { status, audioError, playArticle, pauseArticle, resumeArticle } = useArticleAudio(playbackRate)
-    const [isSaved, setIsSaved] = useState(() => {
-        return isArticleSaved(sourceUrl)
-    })
+    const isSaved = useSelector((state: RootState) =>
+        state.savedArticles.items.some((item) => item.sourceUrl === sourceUrl)
+    )
 
     const [saveMessage, setSaveMessage] = useState('')
 
@@ -218,16 +218,19 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
         }
 
         try {
-            const saved = toggleSavedArticle({
-                sourceUrl: sourceUrl,
-                title: article.title,
-                description: article.description
-            })
+            const nextSaved = !isSaved
 
-            setIsSaved(saved)
+            dispatch(
+                toggleSave({
+                    sourceUrl: sourceUrl,
+                    title: article.title,
+                    description: article.description
+                })
+            )
+
             setSaveMessageType('success')
 
-            if (saved === true) {
+            if (nextSaved === true) {
                 setSaveMessage('Đã lưu bài viết thành công!')
             } else {
                 setSaveMessage('Đã bỏ lưu bài viết thành công!')

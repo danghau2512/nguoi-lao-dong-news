@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, Navigate } from 'react-router-dom'
 import { Bookmark, Clock3, Trash2 } from 'lucide-react'
 import {
-    getSavedArticles,
     getReadingHistory,
-    removeSavedArticle,
     getReadingMark
 } from '../services/personalStorage'
 import type { PersonalArticle } from '../services/personalStorage'
 import { logoutUser } from '../store/authSlice'
+import { removeSaved } from '../store/savedArticlesSlice'
 import type { AppDispatch, RootState } from '../store/store'
 import './PersonalPage.css'
 
@@ -52,8 +51,8 @@ export default function PersonalPage() {
     const user = useSelector((state: RootState) => state.auth.user)
     const [activeTab, setActiveTab] = useState<PersonalTab>('saved')
 
-    const [savedArticles, setSavedArticles] = useState<PersonalArticle[]>(
-        () => getSavedArticles()
+    const savedArticles = useSelector(
+        (state: RootState) => state.savedArticles.items
     )
 
     const [historyArticles, setHistoryArticles] = useState<PersonalArticle[]>(
@@ -64,18 +63,13 @@ export default function PersonalPage() {
 
     function handleChangeTab(nextTab: PersonalTab) {
         setActiveTab(nextTab)
-
-        setSavedArticles(getSavedArticles())
         setHistoryArticles(getReadingHistory())
-
         setMessage('')
     }
 
     function handleRemoveSavedArticle(sourceUrl: string) {
         try {
-            removeSavedArticle(sourceUrl)
-
-            setSavedArticles(getSavedArticles())
+            dispatch(removeSaved(sourceUrl))
             setMessage('Đã bỏ lưu bài viết thành công!')
         } catch {
             setMessage('Không thể bỏ lưu bài viết.')
