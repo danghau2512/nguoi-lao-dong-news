@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, CircleAlert, Highlighter, LoaderCircle, X } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
+import type { AuthContext } from '../layout/MainLayout'
 
 import { fetchArticleDetail } from '../services/articleService'
 import {
@@ -77,6 +78,9 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
     sourceUrl: string
     shouldResume: boolean
 }) {
+    const { user } = useOutletContext<AuthContext>()
+    const navigate = useNavigate()
+    const [shouldRedirectLogin, setShouldRedirectLogin] = useState(false)
     const [article, setArticle] = useState<ArticleDetail | null>(null)
     const [error, setError] = useState('')
     const [retryCount, setRetryCount] = useState(0)
@@ -181,6 +185,20 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
         }
     }, [saveMessage])
 
+    useEffect(() => {
+        if (shouldRedirectLogin === false) {
+            return
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            navigate('/dang-nhap')
+        }, 1200)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+        }
+    }, [shouldRedirectLogin, navigate])
+
     function handleRetry() {
         setError('')
         setRetryCount((count) => count + 1)
@@ -188,6 +206,13 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
 
     function handleToggleSave() {
         if (article === null) {
+            return
+        }
+
+        if (user === null) {
+            setSaveMessageType('error')
+            setSaveMessage('Vui lòng đăng nhập để lưu bài viết.')
+            setShouldRedirectLogin(true)
             return
         }
 
@@ -518,7 +543,7 @@ function ArticleDetailView({ sourceUrl, shouldResume}: {
                     author={article.author}
                     publishedAt={article.publishedAt}
                     readingMinutes={article.readingMinutes}
-                    isSaved={isSaved}
+                    isSaved={user !== null && isSaved}
                     onToggleSave={handleToggleSave}
                     onFontSizeChange={handleFontSizeChange}
                     onListen={listenControl.onClick}
