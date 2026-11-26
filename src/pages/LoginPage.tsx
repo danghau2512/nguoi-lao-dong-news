@@ -1,52 +1,81 @@
 import './LoginPage.css'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { login } from '../services/authService'
-import { Navigate, useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import type { AuthContext } from '../layout/MainLayout'
 
 export default function LoginPage() {
-
     const { user, updateUser } = useOutletContext<AuthContext>()
+    const navigate = useNavigate()
 
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
+
+    useEffect(() => {
+        if (user !== null) {
+            navigate('/ca-nhan', { replace: true })
+        }
+    }, [user, navigate])
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         if (isLoading) return
 
-        const formData = new FormData(event.currentTarget)
-        const email = String(formData.get('email') ?? '')
-        const password = String(formData.get('password') ?? '')
+        const trimmedEmail = email.trim()
+
+        if (trimmedEmail === '') {
+            setError('Vui lòng nhập email.')
+            return
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+            setError('Email không đúng định dạng.')
+            return
+        }
+
+        if (password === '') {
+            setError('Vui lòng nhập mật khẩu.')
+            return
+        }
+
+        if (password.length < 6) {
+            setError('Mật khẩu phải có ít nhất 6 ký tự.')
+            return
+        }
 
         setError('')
         setIsLoading(true)
 
         try {
-            const loggedInUser = await login(email, password)
+            const loggedInUser = await login(trimmedEmail, password)
             updateUser(loggedInUser)
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Đăng nhập thất bại.')
+            navigate('/ca-nhan')
+        } catch (caughtError) {
+            setError(
+                caughtError instanceof Error
+                    ? caughtError.message
+                    : 'Đăng nhập thất bại.'
+            )
         } finally {
             setIsLoading(false)
         }
     }
 
-    if (user) {
-        return <Navigate to="/ca-nhan" replace />
-    }
     return (
         <section className="login-page">
             <h1>Đăng nhập</h1>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
                 <label htmlFor="login-email">Email</label>
                 <input
                     id="login-email"
                     name="email"
                     type="email"
                     autoComplete="username"
-                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                 />
 
                 <label htmlFor="login-password">Mật khẩu</label>
@@ -55,10 +84,11 @@ export default function LoginPage() {
                     name="password"
                     type="password"
                     autoComplete="current-password"
-                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
                 />
 
-                {error && <p role="alert">{error}</p>}
+                {error !== '' && <p role="alert">{error}</p>}
 
                 <button type="submit" disabled={isLoading}>
                     {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
