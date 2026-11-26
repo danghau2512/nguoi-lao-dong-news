@@ -1,54 +1,75 @@
-import { useState, type FormEvent } from 'react'
-import {MessageCircle} from "lucide-react";
+import { useEffect, useState, type FormEvent } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { MessageCircle } from 'lucide-react'
+import {
+    addArticleComment,
+    loadArticleComments,
+    type ArticleComment,
+} from '../store/commentsSlice'
+import type { AppDispatch, RootState } from '../store/store'
 import './ArticleComments.css'
-type Comment = {
-    id: string
-    author: string
-    content: string
-    createdAt: string
-}
+
+const emptyComments: ArticleComment[] = []
 
 export default function ArticleComments({ sourceUrl }: { sourceUrl: string }) {
-    const storageKey = `goctin:comments:${sourceUrl}`
+    const dispatch = useDispatch<AppDispatch>()
+    const comments = useSelector(
+        (state: RootState) => state.comments.byArticle[sourceUrl] ?? emptyComments
+    )
 
-    const [comments, setComments] = useState<Comment[]>(() => {
-        try {
-            const saved = localStorage.getItem(storageKey)
-            return saved ? JSON.parse(saved) : []
-        } catch {
-            return []
-        }
-    })
     const [author, setAuthor] = useState('')
     const [content, setContent] = useState('')
     const [error, setError] = useState('')
 
+    useEffect(() => {
+        dispatch(loadArticleComments(sourceUrl))
+    }, [dispatch, sourceUrl])
+
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
+        const trimmedAuthor = author.trim()
         const text = content.trim()
-        if (!text) {
+
+        if (trimmedAuthor.length > 50) {
+            setError('Tên hiển thị không được vượt quá 50 ký tự.')
+            return
+        }
+
+        if (text === '') {
             setError('Bạn hãy nhập nội dung bình luận.')
             return
         }
 
-        const comment: Comment = {
+        if (text.length < 3) {
+            setError('Nội dung bình luận phải có ít nhất 3 ký tự.')
+            return
+        }
+
+        if (text.length > 500) {
+            setError('Nội dung bình luận không được vượt quá 500 ký tự.')
+            return
+        }
+
+        const comment: ArticleComment = {
             id: crypto.randomUUID(),
-            author: author.trim() || 'Khách',
+            author: trimmedAuthor || 'Khách',
             content: text,
             createdAt: new Date().toISOString(),
         }
 
-        const nextComments = [comment, ...comments]
-
         try {
-            localStorage.setItem(storageKey, JSON.stringify(nextComments))
+            dispatch(
+                addArticleComment({
+                    sourceUrl,
+                    comment,
+                })
+            )
         } catch {
             setError('Không lưu được bình luận trên trình duyệt này.')
             return
         }
 
-        setComments(nextComments)
         setContent('')
         setError('')
     }
@@ -60,7 +81,7 @@ export default function ArticleComments({ sourceUrl }: { sourceUrl: string }) {
                 Bình luận ({comments.length})
             </h2>
 
-            <form className="article-comments__form" onSubmit={handleSubmit}>
+            <form className="article-comments__form" onSubmit={handleSubmit} noValidate>
                 <div className="article-comments__field article-comments__name">
                     <label htmlFor="comment-author">Tên hiển thị (tùy chọn)</label>
                     <input
@@ -80,12 +101,11 @@ export default function ArticleComments({ sourceUrl }: { sourceUrl: string }) {
                         placeholder="Viết bình luận của bạn..."
                         rows={4}
                         maxLength={500}
-                        required
                         onChange={(event) => setContent(event.target.value)}
                     />
                 </div>
 
-                {error && <p className="article-comments__error" role="alert">{error}</p>}
+                {error !== '' && <p className="article-comments__error" role="alert">{error}</p>}
 
                 <div className="article-comments__actions">
                     <button type="submit">Gửi bình luận</button>
@@ -98,9 +118,9 @@ export default function ArticleComments({ sourceUrl }: { sourceUrl: string }) {
                 <ul className="article-comments__list">
                     {comments.map((comment) => (
                         <li key={comment.id} className="article-comments__item">
-                        <span className="article-comments__avatar" aria-hidden="true">
-                            {comment.author.charAt(0).toUpperCase()}
-                        </span>
+                            <span className="article-comments__avatar" aria-hidden="true">
+                                {comment.author.charAt(0).toUpperCase()}
+                            </span>
 
                             <div className="article-comments__body">
                                 <div className="article-comments__meta">
